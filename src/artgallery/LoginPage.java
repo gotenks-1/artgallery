@@ -43,6 +43,7 @@ public class LoginPage extends JFrame {
 			public void run() {
 				try {
 					LoginPage frame = new LoginPage();
+					frame.setResizable(false);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
