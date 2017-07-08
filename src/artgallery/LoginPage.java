@@ -14,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.SystemColor;
 //
 //import javax.swing.ButtonGroup;
 //import javax.swing.JLabel;
@@ -84,6 +85,7 @@ public class LoginPage extends JFrame {
 		contentPane.setLayout(null);
 		
 		JRadioButton rdbtnAdmin = new JRadioButton("Adminstrator ");
+		rdbtnAdmin.setBackground(SystemColor.textHighlight);
 		rdbtnAdmin.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
 		rdbtnAdmin.setBounds(436, 283, 115, 33);
 		contentPane.add(rdbtnAdmin);
@@ -109,6 +111,7 @@ public class LoginPage extends JFrame {
 		contentPane.add(lblTypeOfUser);
 		
 		JRadioButton rdbtnUser = new JRadioButton("User");
+		rdbtnUser.setBackground(SystemColor.textHighlight);
 		rdbtnUser.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
 		rdbtnUser.setBounds(588, 285, 115, 29);
 		contentPane.add(rdbtnUser);
@@ -191,5 +194,11 @@ public class LoginPage extends JFrame {
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setBounds(81, 146, 111, 2);
 		contentPane.add(separator_1);
+		
+		JSeparator separator_2 = new JSeparator();
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		separator_2.setForeground(Color.BLACK);
+		separator_2.setBounds(346, 43, 2, 328);
+		contentPane.add(separator_2);
 	}
 }
