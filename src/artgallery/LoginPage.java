@@ -92,11 +92,11 @@ public class LoginPage extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setBackground(UIManager.getColor("info"));
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel.setBounds(379, 82, 322, 287);
+		panel.setBounds(383, 84, 322, 287);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-		JRadioButton rdbtnAdmin = new JRadioButton("Admin");
+		final JRadioButton rdbtnAdmin = new JRadioButton("Admin");
 		buttonGroup.add(rdbtnAdmin);
 		rdbtnAdmin.setBounds(146, 152, 90, 33);
 		panel.add(rdbtnAdmin);
@@ -112,6 +112,21 @@ public class LoginPage extends JFrame {
 		rdbtnUser.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
 		
 		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			//	JRadioButton b= (JRadioButton)e.getSource();
+			if(rdbtnAdmin.isSelected())
+				{
+				new AdminPage().setVisible(true);
+				dispose();
+				}
+				else
+				{
+					new RegistereduserPage().setVisible(true);
+					dispose();
+				}
+			}
+		});
 		btnLogin.setBounds(5, 189, 303, 33);
 		panel.add(btnLogin);
 		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -194,7 +209,9 @@ public class LoginPage extends JFrame {
 		btnRegister.setBounds(5, 239, 299, 33);
 		registerpanel.add(btnRegister);
 		btnRegister.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
+				new RegistereduserPage().setVisible(true);
+				dispose();
 			}
 		});
 		btnRegister.setFont(new Font("Tahoma", Font.PLAIN, 16));
