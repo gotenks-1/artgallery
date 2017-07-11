@@ -12,7 +12,11 @@ import javax.swing.border.EmptyBorder;
 //import javax.swing.JMenu;
 //
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 import java.awt.SystemColor;
 import javax.swing.border.TitledBorder;
@@ -34,10 +38,60 @@ public class LoginPage extends JFrame {
 	private JTextField ruser;
 	private JPasswordField rpass;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
+	DBConnect db=new DBConnect();
 
 	/**
 	 * Launch the application.
 	 */
+	boolean validatename(String s){
+		if(s.length()>2)
+			return true;
+		else
+			return false;
+	}
+	
+	boolean validateuser(String s){
+		if(s.length()<2)
+			return false;
+		String qry="select * from users where username='"+s+"'";
+		try {
+			ResultSet rs=db.smt.executeQuery(qry);
+			rs.last();
+			if(rs.getRow()>0)
+				return false;
+			else
+				return true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	boolean validateemail(String s){
+		int d=0;
+		boolean found=false;
+		if(s.length()<4)
+			return false;
+		char []ch=s.toCharArray();
+		for(char c:ch){
+			if(c=='@')
+				found=true;
+			if(found){
+				if(c=='.'){
+					if(d>=2)
+						return true;
+					else
+						return false;
+				}
+				else
+					d++;
+			}
+		}
+		return false;
+		
+	}
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -61,30 +115,6 @@ public class LoginPage extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Color c=new Color(216, 186, 186);
-		
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
-		menuBar.setForeground(Color.WHITE);
-		menuBar.setBackground(Color.BLACK);
-		setJMenuBar(menuBar);
-		
-		JMenu mnLogin = new JMenu("HOME ");
-		mnLogin.setForeground(Color.WHITE);
-		mnLogin.setBackground(Color.BLACK);
-		mnLogin.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
-		menuBar.add(mnLogin);
-		
-		JMenu mnLogout = new JMenu("About Us");
-		mnLogout.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
-		mnLogout.setForeground(Color.WHITE);
-		mnLogout.setBackground(Color.BLACK);
-		menuBar.add(mnLogout);
-		
-		JMenu mnContactUs = new JMenu("Contact us");
-		mnContactUs.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
-		mnContactUs.setForeground(Color.WHITE);
-		mnContactUs.setBackground(Color.BLACK);
-		menuBar.add(mnContactUs);
 		contentPane.setBackground(UIManager.getColor("info"));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -92,7 +122,7 @@ public class LoginPage extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setBackground(UIManager.getColor("info"));
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel.setBounds(383, 84, 322, 287);
+		panel.setBounds(383, 120, 322, 287);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
@@ -115,15 +145,44 @@ public class LoginPage extends JFrame {
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			//	JRadioButton b= (JRadioButton)e.getSource();
+				
+				String uname=ruser.getText();
+				String upass=String.valueOf(rpass.getPassword());
 			if(rdbtnAdmin.isSelected())
 				{
-				new AdminPage().setVisible(true);
-				dispose();
+					String qry="select * from adminlogin where username='"+uname+"' and pass='"+upass+"'";
+					try {
+						ResultSet rs=db.smt.executeQuery(qry);
+						if(rs.last()&&rs.getRow()==1){
+							new AdminPage().setVisible(true);
+							dispose();
+						}
+						else{
+							JOptionPane.showMessageDialog(null,"Invalid Username/Password");
+						}
+					} 
+					catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				
 				}
 				else
 				{
-					new RegistereduserPage().setVisible(true);
-					dispose();
+					String qry="select * from users where username='"+uname+"' and pass='"+upass+"'";
+					try {
+						ResultSet rs=db.smt.executeQuery(qry);
+						if(rs.last()&&rs.getRow()==1){
+							new RegistereduserPage().setVisible(true);
+							dispose();
+						}
+						else{
+							JOptionPane.showMessageDialog(null,"Invalid Username/Password");
+						}
+					} 
+					catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					
 				}
 			}
 		});
@@ -162,7 +221,7 @@ public class LoginPage extends JFrame {
 		JPanel registerpanel = new JPanel();
 		registerpanel.setBackground(UIManager.getColor("info"));
 		registerpanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		registerpanel.setBounds(15, 84, 309, 287);
+		registerpanel.setBounds(15, 120, 309, 287);
 		contentPane.add(registerpanel);
 		registerpanel.setLayout(null);
 		
@@ -210,8 +269,47 @@ public class LoginPage extends JFrame {
 		registerpanel.add(btnRegister);
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new RegistereduserPage().setVisible(true);
-				dispose();
+				String rname=nname.getText();
+				String ruser=nuser.getText();
+				String rpass=String.valueOf(npass.getPassword());
+				String remail=nemail.getText();
+				
+				if(validatename(rname)){
+					if(ruser.length()>2){
+						if(validateuser(ruser)){
+							if(validateemail(remail)){
+								String sql="insert into users(name,username,pass,email) values(?,?,?,?)";
+								try {
+									PreparedStatement ps=db.conn.prepareStatement(sql);
+									ps.setString(1, rname);
+									ps.setString(2, ruser);
+									ps.setString(3, rpass);
+									ps.setString(4, remail);
+									ps.executeUpdate();
+									JOptionPane.showMessageDialog(contentPane,"Registered Successfully");
+
+									new RegistereduserPage().setVisible(true);
+									dispose();
+								} catch (SQLException e1) {
+									e1.printStackTrace();
+								}
+							}
+							else{
+								JOptionPane.showMessageDialog(contentPane,"Enter valid email");
+							}
+						}
+						else{
+							JOptionPane.showMessageDialog(contentPane,"Username already exists. Choose another username");
+						}
+					}
+					else{
+						JOptionPane.showMessageDialog(contentPane,"Username should be greater than 2 characters");
+					}
+				}
+				else{
+					JOptionPane.showMessageDialog(contentPane,"Enter valid name");
+				}
+				
 			}
 		});
 		btnRegister.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -228,7 +326,29 @@ public class LoginPage extends JFrame {
 		JSeparator separator_2 = new JSeparator();
 		separator_2.setOrientation(SwingConstants.VERTICAL);
 		separator_2.setForeground(Color.BLACK);
-		separator_2.setBounds(350, 84, 2, 287);
+		separator_2.setBounds(350, 120, 2, 287);
 		contentPane.add(separator_2);
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(0, 0, 99, 99);
+		contentPane.add(panel_1);
+		panel_1.setLayout(null);
+		
+		JLabel logolabel = new JLabel("");
+		logolabel.setBounds(0, 0, 99, 99);
+		panel_1.add(logolabel);
+		ImageIcon ic=new ImageIcon(new ImageIcon(LoginPage.class.getResource("/image/artgallery.jpg")).getImage().getScaledInstance(panel_1.getWidth(), panel_1.getHeight(), Image.SCALE_SMOOTH));
+		logolabel.setIcon(ic);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBounds(100, 0, 633, 99);
+		contentPane.add(panel_2);
+		panel_2.setLayout(null);
+		
+		JLabel labelname = new JLabel("");
+		labelname.setBounds(0, 0, 633, 99);
+		panel_2.add(labelname);
+		ImageIcon ic1=new ImageIcon(new ImageIcon(LoginPage.class.getResource("/image/art1.jpg")).getImage().getScaledInstance(panel_2.getWidth(), panel_2.getHeight(), Image.SCALE_SMOOTH));
+		labelname.setIcon(ic1);
 	}
 }

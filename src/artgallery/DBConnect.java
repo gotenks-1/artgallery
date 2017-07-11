@@ -12,15 +12,15 @@ public class DBConnect {
 		return smt;
 	}
 
-	public DBConnect() throws Exception{
+	public DBConnect(){
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			 conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/test_a","root","");
+			 conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/artgallery","root","");
 			 smt=conn.createStatement();
-			ResultSet r=smt.executeQuery("select * from info");
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			throw e;
+			e.printStackTrace();
 		}
 		
 	}
