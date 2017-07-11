@@ -3,6 +3,7 @@ package artgallery;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -20,10 +21,12 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.Color;
+import java.awt.Font;
 
 public class MainPage extends JFrame {
 
 	private JPanel contentPane;
+	static MainPage frame;
 
 	/**
 	 * Launch the application.
@@ -32,7 +35,7 @@ public class MainPage extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainPage frame = new MainPage();
+					frame = new MainPage();
 					frame.setResizable(false);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -47,40 +50,47 @@ public class MainPage extends JFrame {
 	 */
 	public MainPage() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 659, 452);
+		setBounds(100, 100, 731, 445);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 0, 299, 174);
+		panel.setBounds(0, 0, 174, 174);
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel();
 		lblNewLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		//lblNewLabel.setIcon(new ImageIcon(MainPage.class.getResource("/image/artgallery.jpg")));
-		lblNewLabel.setBounds(0, 0, 299, 174);
+		lblNewLabel.setBounds(0, 0, 174, 174);
 		panel.add(lblNewLabel);
-		ImageIcon image=new ImageIcon("/image/artgallery.jpg");
-		Image i=image.getImage().getScaledInstance(299,174,java.awt.Image.SCALE_SMOOTH);
+		ImageIcon image=new ImageIcon(MainPage.class.getResource("/image/artgallery.jpg"));
+		Image i=image.getImage().getScaledInstance(lblNewLabel.getWidth(),lblNewLabel.getHeight(),Image.SCALE_SMOOTH);
 		image=new ImageIcon(i);
-	//lblNewLabel.setIcon(new ImageIcon(getClass().getResource("/image/artgallery.jpg")).getImage().getScaledInstance(299,174,Image.SCALE_DEFAULT));
-	//ImageIcon image=new ImageIcon(("/image/artgallery.jpg").getScaledInstance(299,174,java.awt.Image.SCALE_DEFAULT));
 		lblNewLabel.setIcon(image);
 	
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_1.setBounds(300, 11, 343, 100);
+		panel_1.setBounds(175, 0, 557, 140);
 		contentPane.add(panel_1);
+		panel_1.setLayout(null);
+		
+		JLabel lblNewLabel_1 = new JLabel();
+		lblNewLabel_1.setBounds(0, 0, 557, 140);
+		panel_1.add(lblNewLabel_1);
+		ImageIcon image1=new ImageIcon(MainPage.class.getResource("/image/art1.jpg"));
+		Image i1=image1.getImage().getScaledInstance(lblNewLabel_1.getWidth(),lblNewLabel_1.getHeight(),Image.SCALE_SMOOTH);
+		image1=new ImageIcon(i1);
+		lblNewLabel_1.setIcon(image1);
 		
 		JPanel panel_2 = new JPanel();
-		panel_2.setBounds(300, 137, 343, 37);
+		panel_2.setBounds(175, 141, 557, 34);
 		contentPane.add(panel_2);
 		
 		JButton btnNewButton_3 = new JButton("Home ");
-		btnNewButton_3.setBounds(3, 5, 63, 23);
+		btnNewButton_3.setBounds(0, 3, 135, 30);
 		btnNewButton_3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
@@ -89,35 +99,39 @@ public class MainPage extends JFrame {
 		panel_2.add(btnNewButton_3);
 		
 		JButton btnNewButton = new JButton("Gallery");
-		btnNewButton.setBounds(71, 5, 65, 23);
+		btnNewButton.setBounds(140, 3, 135, 30);
 		panel_2.add(btnNewButton);
 		
 		JButton btnNewButton_2 = new JButton("Contact us");
-		btnNewButton_2.setBounds(141, 5, 85, 23);
+		btnNewButton_2.setBounds(280, 3, 135, 30);
 		panel_2.add(btnNewButton_2);
 		
 		JButton btnNewButton_1 = new JButton("Login/Register");
-		btnNewButton_1.setBounds(231, 5, 101, 23);
+		btnNewButton_1.setFont(new Font("Dialog", Font.BOLD, 10));
+		btnNewButton_1.setBounds(420, 3, 135, 30);
 		panel_2.add(btnNewButton_1);
 		
-		JLabel lblNewLabel_1 = new JLabel("New label");
-		lblNewLabel_1.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		lblNewLabel_1.setBounds(47, 185, 159, 181);
-		contentPane.add(lblNewLabel_1);
+		JPanel panel_3 = new JPanel();
+		panel_3.setBounds(0, 175, 731, 271);
+		contentPane.add(panel_3);
+		panel_3.setLayout(null);
 		
-		JLabel lblNewLabel_2 = new JLabel("New label");
-		lblNewLabel_2.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		lblNewLabel_2.setBounds(249, 185, 159, 181);
-		contentPane.add(lblNewLabel_2);
+		JLabel sliderlabel = new JLabel("");
+		sliderlabel.setBounds(0, 0, 731, 271);
+		panel_3.add(sliderlabel);
 		
-		JLabel lblNewLabel_3 = new JLabel("New label");
-		lblNewLabel_3.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		lblNewLabel_3.setBounds(443, 185, 159, 181);
-		contentPane.add(lblNewLabel_3);
+//		Code for slider goes here
+//		
+//		
+		
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				new LoginPage().setVisible(true);
+				Rectangle r1=frame.getBounds();
+				LoginPage page=new LoginPage();
+				page.setBounds(r1);
 				dispose();
+				page.setVisible(true);
+				
 			}
 		});
 		btnNewButton_2.addActionListener(new ActionListener() {
