@@ -6,6 +6,7 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -27,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
+
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -244,6 +246,27 @@ public class AdminPage extends JFrame {
 		panel_2.add(textField_2);
 		
 		JButton btnAddDetails = new JButton("Add details");
+		btnAddDetails.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+				String a_name=textField.getText();
+				String des=textField.getText();
+				String contact=textField.getText();
+				
+				DBConnect.addartist.setString(1,a_name);
+				DBConnect.addartist.setString(2,des);
+				DBConnect.addartist.setString(3,contact);
+				
+				DBConnect.addartist.executeUpdate();
+				JOptionPane.showMessageDialog(null, "added");
+				
+				}
+				catch(Exception e)
+				{
+					JOptionPane.showMessageDialog(null,e);
+				}
+			}
+		});
 		btnAddDetails.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
 		btnAddDetails.setBounds(386, 336, 132, 39);
 		panel_2.add(btnAddDetails);
