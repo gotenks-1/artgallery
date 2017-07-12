@@ -172,7 +172,7 @@ public class LoginPage extends JFrame {
 					try {
 						ResultSet rs=db.smt.executeQuery(qry);
 						if(rs.last()&&rs.getRow()==1){
-							new RegistereduserPage().setVisible(true);
+							new RegistereduserPage(uname).setVisible(true);
 							dispose();
 						}
 						else{
@@ -288,7 +288,7 @@ public class LoginPage extends JFrame {
 									ps.executeUpdate();
 									JOptionPane.showMessageDialog(contentPane,"Registered Successfully");
 
-									new RegistereduserPage().setVisible(true);
+									new RegistereduserPage(ruser).setVisible(true);
 									dispose();
 								} catch (SQLException e1) {
 									e1.printStackTrace();
@@ -341,7 +341,7 @@ public class LoginPage extends JFrame {
 		logolabel.setIcon(ic);
 		
 		JPanel panel_2 = new JPanel();
-		panel_2.setBounds(100, 0, 633, 99);
+		panel_2.setBounds(99, 0, 633, 99);
 		contentPane.add(panel_2);
 		panel_2.setLayout(null);
 		
