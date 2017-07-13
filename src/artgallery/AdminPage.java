@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,6 +34,17 @@ import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
+import com.mysql.jdbc.PreparedStatement;
+
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 public class AdminPage extends JFrame {
 
 	private JPanel contentPane;
@@ -56,6 +68,14 @@ public class AdminPage extends JFrame {
 	private JTextField textField_15;
 	private JTextField textField_16;
 	private JTextField textField_17;
+	final JFileChooser fc=new JFileChooser();
+	final JFileChooser fcr=new JFileChooser();
+	File f,file;
+	String path;int it,lists,artworks;
+	ArrayList<Image> aImage=new ArrayList<Image>();
+	int index=0;
+	
+//	final DefaultComboBoxModel cmodel;
 	/**
 	 * Launch the application.
 	 */
@@ -155,12 +175,12 @@ public class AdminPage extends JFrame {
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_4.setBounds(0, 0, 123, 111);
+		panel_4.setBounds(0, 0, 123, 121);
 		panel.add(panel_4);
 		panel_4.setLayout(null);
 		
 		JLabel lblNewLabel_1 = new JLabel("\r\n");
-		lblNewLabel_1.setBounds(0, 0, 123, 111);
+		lblNewLabel_1.setBounds(0, 0, 123, 121);
 		panel_4.add(lblNewLabel_1);
 		ImageIcon image=new ImageIcon(AdminPage.class.getResource("/image/artgallery.jpg"));
 		Image i=image.getImage().getScaledInstance(lblNewLabel_1.getWidth(),lblNewLabel_1.getHeight(),Image.SCALE_SMOOTH);
@@ -198,15 +218,20 @@ public class AdminPage extends JFrame {
 		
 		JPanel panel_5 = new JPanel();
 		panel_5.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panel_5.setBounds(0, 0, 604, 89);
+		panel_5.setBounds(0, 0, 604, 118);
 		panel_3.add(panel_5);
+		panel_5.setLayout(null);
 		
-		JLabel lblNewLabel = new JLabel("New label");
+		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setBounds(118, 23, 321, 71);
+		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblNewLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED,null,null));
 		panel_5.add(lblNewLabel);
 		
 		JPanel panel_6 = new JPanel();
-		panel_6.setBounds(0, 89, 604, 326);
+		panel_6.setBounds(0, 118, 604, 297);
 		panel_3.add(panel_6);
+		panel_6.setLayout(null);
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBackground(Color.CYAN);
@@ -262,7 +287,7 @@ public class AdminPage extends JFrame {
 				
 				}
 				catch(Exception e)
-				{
+				{   e.printStackTrace();
 					JOptionPane.showMessageDialog(null,e);
 				}
 			}
@@ -312,7 +337,67 @@ public class AdminPage extends JFrame {
 		lblEnterArtistId.setBounds(35, 260, 131, 33);
 		panel_7.add(lblEnterArtistId);
 		
-		JComboBox comboBox = new JComboBox();
+		
+		
+		final JComboBox comboBox = new JComboBox();
+		ArrayList<String> arr=new ArrayList<String>();
+		try
+		{
+			while(DBConnect.rs.next())
+			{
+				arr.add(DBConnect.rs.getString(1));
+				
+		     //   cmodel =new DefaultComboBoxModel(arr);
+//				cmodel.addElement();
+			comboBox.addItem(arr.get(arr.size()-1));	
+			}
+		}
+		catch(Exception e)
+		{
+			JOptionPane.showMessageDialog(null,"hi");
+		}
+		comboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//System.out.println("action per"+comboBox.getSelectedItem().toString());
+				try{
+				String items=comboBox.getSelectedItem().toString();
+				  int it=Integer.parseInt(items);
+				DBConnect.removeartist.setInt(1,it);
+//				System.out.println(DBConnect.removeartist.executeQ);
+				
+				ResultSet rs=DBConnect.removeartist.executeQuery();
+
+				boolean st= rs.next();
+				
+				if(st)
+				{
+//       			System.out.println(rs.getObject(1).toString());
+					textField_3.setText(rs.getObject(2).toString());
+					textField_4.setText(rs.getObject(3).toString());
+					textField_5.setText(rs.getObject(4).toString());
+                    textField_6.setText(""+rs.getObject(5).toString());
+                  
+				}
+				
+				JOptionPane.showMessageDialog(null, "displayed");
+				
+				}
+				catch(Exception e)
+				{    e.printStackTrace();
+					JOptionPane.showMessageDialog(null,e);	
+				}
+				
+			}
+			
+		});
+		
+		
+//		comboBox.addItemListener(new ItemListener() {
+//			public void itemStateChanged(ItemEvent arg0) {
+//				System.out.println("state chnge"+comboBox.getSelectedItem().toString());
+//				
+//			}
+//		});
 		comboBox.setBounds(186, 120, 131, 25);
 		panel_7.add(comboBox);
 		
@@ -323,31 +408,59 @@ public class AdminPage extends JFrame {
 		panel_7.add(lblRating);
 		
 		textField_3 = new JTextField();
+		textField_3.setEditable(false);
 		textField_3.setBounds(176, 175, 198, 25);
 		panel_7.add(textField_3);
 		textField_3.setColumns(10);
 		
 		textField_4 = new JTextField();
+		textField_4.setEditable(false);
 		textField_4.setColumns(10);
 		textField_4.setBounds(176, 219, 198, 25);
 		panel_7.add(textField_4);
 		
 		textField_5 = new JTextField();
+		textField_5.setEditable(false);
 		textField_5.setColumns(10);
 		textField_5.setBounds(176, 266, 198, 25);
 		panel_7.add(textField_5);
 		
 		textField_6 = new JTextField();
+		textField_6.setEditable(false);
 		textField_6.setColumns(10);
 		textField_6.setBounds(176, 314, 91, 25);
 		panel_7.add(textField_6);
 		
 		JButton btnNewButton_1 = new JButton("Remove ");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					String items=comboBox.getSelectedItem().toString();
+					  int it=Integer.parseInt(items);
+					DBConnect.remove_artist.setInt(1,it);
+					DBConnect.remove_artist.executeUpdate();
+				   JOptionPane.showMessageDialog(null,"deleted..!!!" );
+				   
+				   
+					
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+					JOptionPane.showMessageDialog(null, e);
+					
+					
+				}
+				
+				
+				
+			}
+		});
 		btnNewButton_1.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
 		btnNewButton_1.setBounds(395, 348, 158, 33);
 		panel_7.add(btnNewButton_1);
 		
-		JPanel panel_8 = new JPanel();
+		final JPanel panel_8 = new JPanel();
 		panel_8.setBackground(new Color(173, 255, 47));
 		panel_1.add(panel_8, "addartworks");
 		panel_8.setLayout(null);
@@ -378,8 +491,19 @@ public class AdminPage extends JFrame {
 		panel_8.add(lblImage);
 		
 		JButton btnChooseFile = new JButton("Choose file");
+		btnChooseFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int val=fc.showOpenDialog(panel_8);
+				
+				if(val==JFileChooser.APPROVE_OPTION)
+				{
+					 f=fc.getSelectedFile();
+					path=f.getPath();
+				}
+			}
+		});
 		btnChooseFile.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnChooseFile.setBounds(127, 269, 154, 23);
+		btnChooseFile.setBounds(149, 267, 133, 23);
 		panel_8.add(btnChooseFile);
 		
 		textField_7 = new JTextField();
@@ -405,10 +529,32 @@ public class AdminPage extends JFrame {
 		JButton btnNewButton_2 = new JButton("Add artworks");
 		btnNewButton_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				try{
+					String art_name=textField_7.getText();
+					String details=textField_8.getText();
+					String cat=textField_9.getText();
+					double price=Double.valueOf(textField_10.getText());
+										
+					FileInputStream fimage=new FileInputStream(f);
+					
+					DBConnect.addartwork.setString(1,details);
+					DBConnect.addartwork.setString(2,art_name);
+					DBConnect.addartwork.setDouble(3,price);
+					DBConnect.addartwork.setInt(4,it);
+					DBConnect.addartwork.setString(5,cat);
+					DBConnect.addartwork.setBlob(6,fimage);
+					
+					DBConnect.addartwork.executeUpdate();
+					JOptionPane.showMessageDialog(null,"added");
+				}
+				catch(Exception e)
+				{
+					JOptionPane.showMessageDialog(null,e);
+				}
 			}
 		});
 		btnNewButton_2.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
-		btnNewButton_2.setBounds(385, 333, 185, 37);
+		btnNewButton_2.setBounds(390, 366, 185, 37);
 		panel_8.add(btnNewButton_2);
 		
 		JLabel lblNewLabel_6 = new JLabel("Add artworks ");
@@ -417,16 +563,95 @@ public class AdminPage extends JFrame {
 		lblNewLabel_6.setBounds(149, 11, 271, 46);
 		panel_8.add(lblNewLabel_6);
 		
-		JPanel panel_9 = new JPanel();
+		JLabel lblEnterArtistid = new JLabel("Enter artist_id :");
+		lblEnterArtistid.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
+		lblEnterArtistid.setBounds(35, 315, 129, 24);
+		panel_8.add(lblEnterArtistid);
+		
+		
+	final	JComboBox comboBox_3 = new JComboBox();
+	ArrayList<String> arry=new ArrayList<String>();
+	try
+	{     
+		DBConnect.rs=DBConnect.smt.executeQuery("select art_id from artist");
+		while(DBConnect.rs.next())
+		{
+			arr.add(DBConnect.rs.getString(1));
+//			System.out.println(DBConnect.rs.getString(1));
+			
+	     //   cmodel =new DefaultComboBoxModel(arr);
+//			cmodel.addElement();
+		comboBox_3.addItem(arr.get(arr.size()-1));	
+		}
+	}
+	catch(Exception e)
+	{
+		JOptionPane.showMessageDialog(null,e);
+	}
+		comboBox_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				String items=comboBox.getSelectedItem().toString();
+				  it=Integer.parseInt(items);
+				
+					
+			}
+		});
+		comboBox_3.setBounds(159, 319, 123, 20);
+		panel_8.add(comboBox_3);
+		
+		
+		final JPanel panel_9 = new JPanel();
 		panel_9.setBackground(new Color(153, 50, 204));
 		panel_1.add(panel_9, "removeartworks");
 		panel_9.setLayout(null);
 		
-		JLabel aimage = new JLabel("New label");
+		final JLabel aimage = new JLabel("");
 		aimage.setBounds(403, 55, 191, 133);
 		panel_9.add(aimage);
+		try
+		{
+			ResultSet img=DBConnect.smt.executeQuery("select image from artworks");
+			while(img.next()){
+				byte[] getimage=img.getBytes("image");
+				aImage.add(new ImageIcon(getimage).getImage());
+						}
+			ImageIcon ic=new ImageIcon(aImage.get(index).getScaledInstance(aimage.getWidth(), aimage.getHeight(), Image.SCALE_SMOOTH));
+			aimage.setIcon(ic);
+			
+		}
+		catch(Exception e){
+			JOptionPane.showMessageDialog(null,e);
+		}
+	
 		
 		JButton btnNewButton_3 = new JButton("Update picture ");
+		btnNewButton_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int im=fcr.showOpenDialog(panel_9);
+				if(im==JFileChooser.APPROVE_OPTION)
+				{
+					 file=fcr.getSelectedFile();
+					ImageIcon ic=new ImageIcon((new ImageIcon(fcr.getSelectedFile().getPath())).getImage().getScaledInstance(aimage.getWidth(), aimage.getHeight(), Image.SCALE_SMOOTH));
+					aimage.setIcon(ic);	
+				}
+//				if(fc.getSelectedFile()!=null)
+//				{
+//					try {
+//						PreparedStatement ps=(PreparedStatement) DBConnect.conn.prepareStatement("insert into artworks(image) values(?)");
+//						InputStream imgg=new FileInputStream(f);
+//						ps.setBlob(1,imgg);
+//						ps.executeUpdate();
+//						
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//				
+//				
+		}
+		});
 		btnNewButton_3.setFont(new Font("Berlin Sans FB", Font.PLAIN, 17));
 		btnNewButton_3.setBounds(419, 226, 162, 23);
 		panel_9.add(btnNewButton_3);
@@ -438,7 +663,7 @@ public class AdminPage extends JFrame {
 		
 		JLabel label = new JLabel(" Name :");
 		label.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
-		label.setBounds(47, 159, 114, 19);
+		label.setBounds(47, 157, 114, 19);
 		panel_9.add(label);
 		
 		JLabel lblDetails_1 = new JLabel("Details :");
@@ -456,11 +681,87 @@ public class AdminPage extends JFrame {
 		lblCategory.setBounds(47, 305, 114, 19);
 		panel_9.add(lblCategory);
 		
-		JComboBox comboBox_1 = new JComboBox();
+		final JComboBox comboBox_1 =  new JComboBox();
+				ArrayList<String> aList=new ArrayList<String>();
+		try{
+			ResultSet rSet=DBConnect.smt.executeQuery("select a_id from artworks");
+			while(rSet.next())
+			{
+				aList.add(rSet.getString(1));
+				comboBox_1.addItem(aList.get(aList.size()-1));
+		
+			}
+		//	JOptionPane.showMessageDialog(null,"list added");
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,e);			
+		}
+		comboBox_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+				String list=comboBox_1.getSelectedItem().toString();
+				 artworks=Integer.parseInt(list);
+				 
+				   //ResultSet update=DBConnect.smt.execu
+				
+					DBConnect.update_artworks.setInt(1,artworks);
+					
+					ResultSet result=DBConnect.update_artworks.executeQuery();
+					System.out.println(result);
+					while(result.next())
+					{   
+						textField_11.setText(result.getObject(2).toString());
+						textField_12.setText(result.getObject(1).toString());
+						textField_13.setText(result.getObject(3).toString());
+						textField_14.setText(result.getObject(4).toString());
+					}
+					
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		
+		
 		comboBox_1.setBounds(171, 110, 89, 23);
 		panel_9.add(comboBox_1);
 		
 		JButton btnNewButton_4 = new JButton("Update");
+		btnNewButton_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					FileInputStream imgg=new FileInputStream(file);
+					
+					
+					String name=textField_11.getText();
+					String details=textField_12.getText();
+					double pr=Double.parseDouble(textField_13.getText());
+					String cat=textField_14.getText();
+					
+					DBConnect.updateartwork.setInt(7,artworks);
+					DBConnect.updateartwork.setString(1,details);
+					DBConnect.updateartwork.setString(2,name);
+					DBConnect.updateartwork.setDouble(3,pr);
+					DBConnect.updateartwork.setString(4,cat);
+					DBConnect.updateartwork.setInt(5,lists);
+					DBConnect.updateartwork.setBlob(6,imgg);
+				  //DBConnect.updateartwork.setInt(8,artworks);
+				 	
+					DBConnect.updateartwork.executeUpdate();
+					JOptionPane.showMessageDialog(null,"added");
+				
+				//	DBConnect.updateartwork.setString(2,);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+				     e.printStackTrace();
+					JOptionPane.showMessageDialog(null,e);
+				}
+			}
+		});
 		btnNewButton_4.setFont(new Font("Berlin Sans FB", Font.PLAIN, 17));
 		btnNewButton_4.setBounds(403, 355, 162, 35);
 		panel_9.add(btnNewButton_4);
@@ -490,6 +791,33 @@ public class AdminPage extends JFrame {
 		lblUpdateArtworks.setFont(new Font("Algerian", Font.PLAIN, 25));
 		lblUpdateArtworks.setBounds(96, 11, 272, 53);
 		panel_9.add(lblUpdateArtworks);
+		
+		JLabel lblArtistId = new JLabel("Artist id :");
+		lblArtistId.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
+		lblArtistId.setBounds(47, 351, 114, 19);
+		panel_9.add(lblArtistId);
+		
+		final JComboBox comboBox_4 = new JComboBox();
+		ArrayList<String> al=new ArrayList<String>();
+		try{
+			ResultSet set=DBConnect.smt.executeQuery("select art_id from artist");
+			
+			while(set.next()){
+				al.add(set.getString(1));
+				comboBox_4.addItem(al.get(al.size()-1));
+			}
+		}
+		catch(Exception e){
+			JOptionPane.showMessageDialog(null,e);
+		}
+		comboBox_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String s=comboBox_4.getSelectedItem().toString();
+				lists=Integer.parseInt(s);
+			}
+		});
+		comboBox_4.setBounds(171, 355, 89, 23);
+		panel_9.add(comboBox_4);
 		
 		JPanel panel_10 = new JPanel();
 		panel_10.setBackground(new Color(255, 255, 0));
@@ -526,7 +854,7 @@ public class AdminPage extends JFrame {
 		lblAnswer.setBounds(46, 290, 113, 28);
 		panel_10.add(lblAnswer);
 		
-		JComboBox comboBox_2 = new JComboBox();
+		final JComboBox comboBox_2 = new JComboBox();
 		comboBox_2.setModel(new DefaultComboBoxModel(new String[] {"Your place of birth ?", "what is your pet name ?", "which is your favourite book ?", "Your favourite sport ?"}));
 		comboBox_2.setBounds(194, 233, 186, 24);
 		panel_10.add(comboBox_2);
@@ -547,6 +875,31 @@ public class AdminPage extends JFrame {
 		panel_10.add(textField_17);
 		
 		JButton btnNewButton_5 = new JButton("Add ");
+		btnNewButton_5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+				String adname=textField_15.getText();
+				String pass=textField_16.getText();
+				String sq_ans=textField_17.getText();
+				String sq=(String) comboBox_2.getSelectedItem();
+				
+				DBConnect.addadmin.setString(1,adname);
+				DBConnect.addadmin.setString(2,pass);
+				DBConnect.addadmin.setString(3,sq);
+				DBConnect.addadmin.setString(4,sq_ans);
+				
+				DBConnect.addadmin.executeUpdate();
+				
+				JOptionPane.showMessageDialog(null,"new admin added sucessfully");
+				
+				}
+				catch(Exception e)
+				{
+					JOptionPane.showMessageDialog(null,"not added");
+				}
+				
+			}
+		});
 		btnNewButton_5.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
 		btnNewButton_5.setBounds(430, 362, 142, 37);
 		panel_10.add(btnNewButton_5);
