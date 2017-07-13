@@ -6,6 +6,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,7 +17,10 @@ import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
 import java.awt.CardLayout;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -25,6 +30,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.awt.event.ActionEvent;
@@ -35,6 +42,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
 import java.awt.Font;
+import javax.swing.JComboBox;
 
 
 
@@ -108,15 +116,187 @@ public class RegistereduserPage extends JFrame {
 	private JLabel labelArtworkImage;
 	private JButton btnAddCart;
 	private JButton btnShowCart;
+	JPanel panelCategoryFilter;
+	JPanel panelArtistFilter;
 	JPanel card_artist;
 	JPanel galleryIntro;
 	JPanel galleryContainer;
 	private ArrayList<ArtistNode> artistList=new ArrayList<ArtistNode>();
 	private ArrayList<ArtworkNode> artworkList=new ArrayList<ArtworkNode>();
+	private ArrayList<JCheckBox> categoryList=new ArrayList<JCheckBox>();
+	private ArrayList<JCheckBox> cbArtistList=new ArrayList<JCheckBox>();
+	private ArrayList<String> filterCatList=new ArrayList<String>();
+	private ArrayList<String> filterArtistList=new ArrayList<String>();
+	boolean catFilter=false;
+	boolean artistFilter=false;
 //	static ArtworkNode artwork1;
 	/**
 	 * Launch the application.
 	 */
+	
+	void generateArtistList(){
+		cbArtistList.clear();
+		try {
+			ResultSet rs=DBConnect.smt.executeQuery("select art_id from artist");
+			while(rs.next()){
+				final JCheckBox cb=new JCheckBox(rs.getString(1));
+				cb.addActionListener(new ActionListener() {					
+					public void actionPerformed(ActionEvent e) {
+						if(cb.isSelected()){
+							filterArtistList.add(cb.getText());
+//							System.out.println("added "+cb.getText());
+						}
+						else{
+							filterArtistList.remove(cb.getText());
+//							System.out.println("removed "+cb.getText());
+						}
+					}
+				});
+				cbArtistList.add(cb);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		GridBagLayout gbl=new GridBagLayout();
+		panelArtistFilter.setPreferredSize(new Dimension(100, 23*categoryList.size()));
+		int rowheight[]=new int[cbArtistList.size()];
+		for(int i=0;i<rowheight.length;i++)
+			rowheight[i]=23;
+		gbl.rowHeights=rowheight;
+		panelArtistFilter.setLayout(gbl);
+		
+		for(int i=0;i<rowheight.length;i++){
+			GridBagConstraints gbc=new GridBagConstraints();
+			gbc.fill=GridBagConstraints.BOTH;
+			gbc.gridx=0;
+			gbc.gridy=i;
+			panelArtistFilter.add(cbArtistList.get(i), gbc);
+//			System.out.println(categoryList.get(i));
+		}
+		
+//		cbArtistList.clear();
+		
+	}
+	
+	void clearFilter(JCheckBox cb){
+		cb.setSelected(false);
+	}
+	
+	void applyFilter(){
+		getAllArtwork();
+		if(catFilter){
+			for(int i=0;i<artworkList.size();i++){
+//				System.out.print("checking "+artworkList.get(i).category);
+				if(!filterCatList.contains(artworkList.get(i).category)){
+					artworkList.remove(i);
+					i--;
+//					System.out.println("\tnot found");
+				}
+			}
+		}
+		
+		if(artistFilter){
+			for(int i=0;i<artworkList.size();i++){
+				if(!filterArtistList.contains(String.valueOf(artworkList.get(i).artist_id))){
+					artworkList.remove(i);
+					i--;
+				}
+			}
+			
+		}
+		addAllArtworktoPanel();
+	}
+	
+	
+	void generateCategoryList(){
+		categoryList.clear();
+		try {
+			ResultSet rs=DBConnect.smt.executeQuery("select distinct(category) from artworks");
+			while(rs.next()){
+				final JCheckBox cb=new JCheckBox(rs.getString(1));
+				cb.addActionListener(new ActionListener() {					
+					public void actionPerformed(ActionEvent e) {
+						if(cb.isSelected()){
+							filterCatList.add(cb.getText());
+							System.out.println("added "+cb.getText());
+						}
+						else{
+							filterCatList.remove(cb.getText());
+							System.out.println("removed "+cb.getText());
+						}
+					}
+				});
+				categoryList.add(cb);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		GridBagLayout gbl=new GridBagLayout();
+		panelCategoryFilter.setPreferredSize(new Dimension(100, 23*categoryList.size()));
+		int rowheight[]=new int[categoryList.size()];
+		for(int i=0;i<rowheight.length;i++)
+			rowheight[i]=23;
+		gbl.rowHeights=rowheight;
+		panelCategoryFilter.setLayout(gbl);
+		
+		for(int i=0;i<rowheight.length;i++){
+			GridBagConstraints gbc=new GridBagConstraints();
+			gbc.fill=GridBagConstraints.BOTH;
+			gbc.gridx=0;
+			gbc.gridy=i;
+			panelCategoryFilter.add(categoryList.get(i), gbc);
+//			System.out.println(categoryList.get(i));
+		}
+		
+//		categoryList.clear();
+		
+	}
+	
+	
+	void sortArtworks(int i){
+		switch(i){
+		case 1:Collections.sort(artworkList,new Comparator<ArtworkNode>() {
+			public int compare(ArtworkNode node1,ArtworkNode node2){
+				return node1.name.compareTo(node2.name);
+			}
+		});
+		addAllArtworktoPanel();
+		break;
+		
+		case 2:Collections.sort(artworkList,new Comparator<ArtworkNode>() {
+			public int compare(ArtworkNode node1,ArtworkNode node2){
+				return node2.id-node1.id;
+			}
+		});
+		addAllArtworktoPanel();
+		break;
+		
+		case 3:Collections.sort(artworkList,new Comparator<ArtworkNode>() {
+			public int compare(ArtworkNode node1,ArtworkNode node2){
+				return (int)(node1.price-node2.price);
+			}
+		});
+		addAllArtworktoPanel();
+		break;
+		
+		case 4:Collections.sort(artworkList,new Comparator<ArtworkNode>() {
+			public int compare(ArtworkNode node1,ArtworkNode node2){
+				return (int)(node2.price-node1.price);
+			}
+		});
+		addAllArtworktoPanel();
+		break;
+		
+		case 5:Collections.sort(artworkList,new Comparator<ArtworkNode>() {
+			public int compare(ArtworkNode node1,ArtworkNode node2){
+				return (int)(node1.sold-node2.sold);
+			}
+		});
+		addAllArtworktoPanel();
+		break;
+		
+		}
+	}
 	
 	void addProductDetail(ArtworkNode artwork1){
 		productID.setText(""+artwork1.id+"");
@@ -148,12 +328,7 @@ public class RegistereduserPage extends JFrame {
 	}
 	
 	
-	
-	
-	
-	void addAllArtworktoPanel(){
-		galleryIntro.removeAll();
-		
+	void getAllArtwork(){
 		artworkList.clear();
 		
 		try {
@@ -175,6 +350,11 @@ public class RegistereduserPage extends JFrame {
 			
 			e1.printStackTrace();
 		}
+	}
+	
+	
+	void addAllArtworktoPanel(){
+		galleryIntro.removeAll();
 		
 		GridBagLayout gbl_galleryIntro=new GridBagLayout();
 		gbl_galleryIntro.columnWidths=new int[]{200,200,200};
@@ -183,7 +363,7 @@ public class RegistereduserPage extends JFrame {
 		for(int i=0;i<noofrowsartwork;i++)
 			artworkrowheightarray[i]=300;
 		gbl_galleryIntro.rowHeights=artworkrowheightarray;
-		galleryIntro.setPreferredSize(new Dimension(445,noofrowsartwork*300));
+		galleryIntro.setPreferredSize(new Dimension(445,noofrowsartwork*300>450?noofrowsartwork*300:450));
 		galleryIntro.setLayout(gbl_galleryIntro);
 		
 		for(int i=0;i<artworkList.size();i++){
@@ -260,8 +440,10 @@ public class RegistereduserPage extends JFrame {
 		panel_card.add(btnShowDetail);
 		btnShowDetail.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
 				addProductDetail(artwork);
-				card2.show(galleryContainer, "name_15095042014928");
+				card2.show(galleryContainer, "name_3950194483962");
+//				System.out.println("i am called");
 			}
 		});
 		
@@ -391,14 +573,14 @@ public class RegistereduserPage extends JFrame {
 		JOptionPane.showMessageDialog(contentPane, "Welcome"+username);
 	}
 	
-	JPanel artistpanel(){
-		JPanel mainPanel=new JPanel();
-		
-		
-		
-		return mainPanel;
-		
-	}
+//	JPanel artistpanel(){
+//		JPanel mainPanel=new JPanel();
+//		
+//		
+//		
+//		return mainPanel;
+//		
+//	}
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -466,6 +648,7 @@ public class RegistereduserPage extends JFrame {
 		JButton btnGallery = new JButton("Gallery");
 		btnGallery.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				getAllArtwork();
 				addAllArtworktoPanel();
 				card.show(panel_container, "name_7377952523234");
 				card2.show(galleryContainer, "name_15095058194076");
@@ -517,6 +700,7 @@ public class RegistereduserPage extends JFrame {
 		JPanel card_home = new JPanel();
 		card_home.setBackground(Color.CYAN);
 		panel_container.add(card_home, "name_7296281800690");
+		card_home.setLayout(null);
 		
 		JPanel card_gallery = new JPanel();
 		card_gallery.setBackground(new Color(0, 191, 255));
@@ -528,118 +712,114 @@ public class RegistereduserPage extends JFrame {
 		gallarySortByPanel.setBackground(new Color(0, 255, 0));
 		gallarySortByPanel.setBounds(0, 0, 731, 20);
 		card_gallery.add(gallarySortByPanel);
+		gallarySortByPanel.setLayout(null);
 		
-		JPanel galleryDetail = new JPanel();
-		gallarySortByPanel.add(galleryDetail);
-		galleryDetail.setBackground(new Color(30, 144, 255));
-		galleryDetail.setLayout(null);
-		
-		JButton btnBack = new JButton("Back");
-		btnBack.addActionListener(new ActionListener() {
+		final JComboBox sortByCB = new JComboBox();
+		sortByCB.setBounds(598, 0, 130, 20);
+		String sortByArray[]={"By Name","Most recent","Price(low to high)","Price(high to low)","High sellers"};
+		sortByCB.setModel(new DefaultComboBoxModel<String>(sortByArray));
+		gallarySortByPanel.add(sortByCB);
+		sortByCB.addActionListener(new ActionListener() {			
 			public void actionPerformed(ActionEvent e) {
-				card2.show(galleryContainer, "name_15095058194076");
-			}
-		});
-		btnBack.setBounds(0, 0, 117, 25);
-		btnBack.setBorderPainted(false);
-		btnBack.setContentAreaFilled(false);
-		galleryDetail.add(btnBack);
-		
-		JPanel panel = new JPanel();
-		panel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		panel.setBounds(50, 50, 200, 300);
-		galleryDetail.add(panel);
-		panel.setLayout(null);
-		
-		labelArtworkImage = new JLabel("Artwork Image");
-		labelArtworkImage.setBounds(0, 0, 200, 300);
-		labelArtworkImage.setBorder(new LineBorder(new Color(0, 0, 0), 2));
-		panel.add(labelArtworkImage);
-		
-		JLabel lblProductId = new JLabel("Product ID :-");
-		lblProductId.setBounds(300, 50, 110, 15);
-		galleryDetail.add(lblProductId);
-		
-		productID = new JLabel("New label");
-		productID.setBounds(450, 50, 140, 15);
-		galleryDetail.add(productID);
-		
-		JLabel labelName = new JLabel("Name :-");
-		labelName.setBounds(300, 80, 110, 15);
-		galleryDetail.add(labelName);
-		
-		productName = new JLabel("New label");
-		productName.setBounds(450, 80, 140, 15);
-		galleryDetail.add(productName);
-		
-		JLabel labelCat = new JLabel("Category :-");
-		labelCat.setBounds(300, 110, 110, 15);
-		galleryDetail.add(labelCat);
-		
-		productCat = new JLabel("New label");
-		productCat.setBounds(450, 110, 140, 15);
-		galleryDetail.add(productCat);
-		
-		JLabel labelArtist = new JLabel("Artist :-");
-		labelArtist.setBounds(300, 140, 110, 15);
-		galleryDetail.add(labelArtist);
-		
-		productArtist = new JLabel("New label");
-		productArtist.setBounds(450, 140, 140, 15);
-		galleryDetail.add(productArtist);
-		
-		JLabel labelPrice = new JLabel("Price :-");
-		labelPrice.setBounds(300, 170, 110, 15);
-		galleryDetail.add(labelPrice);
-		
-		productPrice = new JLabel("New label");
-		productPrice.setBounds(450, 170, 140, 15);
-		galleryDetail.add(productPrice);
-		
-		JLabel labelQty = new JLabel("Remaining :-");
-		labelQty.setBounds(300, 200, 110, 15);
-		galleryDetail.add(labelQty);
-		
-		productQty = new JLabel("New label");
-		productQty.setBounds(450, 200, 140, 15);
-		galleryDetail.add(productQty);
-		
-		JLabel labelDesc = new JLabel("Description :-");
-		labelDesc.setBounds(300, 230, 110, 15);
-		galleryDetail.add(labelDesc);
-		
-//		productDesc = new JLabel("New label");
-//		productDesc.setBounds(450, 230, 140, 15);
-		
-		productDesc=new JTextArea();
-		productDesc.setFont(new Font("Dialog", Font.BOLD, 12));
-		productDesc.setBounds(450,230,140,60);
-		productDesc.setBackground(new Color(30, 144, 255));
-		productDesc.setEditable(false);
-		galleryDetail.add(productDesc);
-		
-		btnAddCart=new JButton("Add to Cart");
-		btnAddCart.setBounds(300,308,130,40);
-		galleryDetail.add(btnAddCart);
-		btnAddCart.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(contentPane, "Added to cart");
+				sortArtworks(sortByCB.getSelectedIndex()+1);
 			}
 		});
 		
-		btnShowCart=new JButton("View Cart");
-		btnShowCart.setBounds(450,308,130,40);
-		galleryDetail.add(btnShowCart);
-		btnShowCart.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent e) {
-				card.show(panel_container, "name_7426609771253");
-			}
-		});
+		JLabel lblSortBy = new JLabel("Sort By :-");
+		lblSortBy.setBounds(530, 0, 70, 15);
+		gallarySortByPanel.add(lblSortBy);
 		
 		JPanel galleryFilter = new JPanel();
 		galleryFilter.setBackground(new Color(0, 255, 127));
 		galleryFilter.setBounds(0, 20, 120, 450);
 		card_gallery.add(galleryFilter);
+		galleryFilter.setLayout(null);
+		
+		JLabel lblFilter = new JLabel("Filters");
+		lblFilter.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblFilter.setBounds(0, 5, 120, 15);
+		galleryFilter.add(lblFilter);
+		
+		JLabel lblCategory = new JLabel("Category :-");
+		lblCategory.setBounds(0, 35, 120, 15);
+		galleryFilter.add(lblCategory);
+		
+		panelCategoryFilter = new JPanel();
+		panelCategoryFilter.setBounds(0, 50, 120, 150);
+		JScrollPane categoryScroll=new JScrollPane(panelCategoryFilter);
+		categoryScroll.setBounds(0, 50, 120, 150);
+//		panelCategoryFilter.setPreferredSize(new Dimension(100, 1200));
+		
+		galleryFilter.add(categoryScroll);
+		
+		generateCategoryList();
+		
+		JButton btnCateoryApply = new JButton("Apply");
+		btnCateoryApply.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				catFilter=true;
+				applyFilter();
+			}
+		});
+		btnCateoryApply.setFont(new Font("Dialog", Font.PLAIN, 9));
+		btnCateoryApply.setBounds(0, 200, 60, 20);
+		galleryFilter.add(btnCateoryApply);
+		
+		JButton btnCategoryClear = new JButton("Clear");
+		btnCategoryClear.setFont(new Font("Dialog", Font.PLAIN, 9));
+		btnCategoryClear.setBounds(60, 200, 60, 20);
+		galleryFilter.add(btnCategoryClear);
+		btnCategoryClear.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				catFilter=false;
+				for(JCheckBox cb:categoryList){
+					clearFilter(cb);
+				}
+				applyFilter();
+			}
+		});
+		
+		JLabel lblArtist = new JLabel("Artist :-");
+		lblArtist.setBounds(0, 240, 120, 15);
+		galleryFilter.add(lblArtist);
+		
+		panelArtistFilter = new JPanel();
+//		panelArtistFilter.setBounds(0, 255, 120, 150);
+		JScrollPane artistScroll=new JScrollPane(panelArtistFilter);
+		artistScroll.setBounds(0, 255, 120, 150);
+//		panelArtistFilter.setPreferredSize(new Dimension(100, 1200));
+		galleryFilter.add(artistScroll);
+		
+		generateArtistList();
+		
+		JButton btnArtistApply = new JButton("Apply");
+		btnArtistApply.setFont(new Font("Dialog", Font.PLAIN, 9));
+		btnArtistApply.setBounds(0, 405, 60, 20);
+		galleryFilter.add(btnArtistApply);
+		btnArtistApply.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent e) {
+				artistFilter=true;
+				applyFilter();
+			}
+		});
+		
+		JButton btnArtistClear = new JButton("Clear");
+		btnArtistClear.setFont(new Font("Dialog", Font.PLAIN, 9));
+		btnArtistClear.setBounds(60, 405, 60, 20);
+		galleryFilter.add(btnArtistClear);
+		btnArtistClear.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				artistFilter=false;
+				for(JCheckBox cb:cbArtistList){
+					clearFilter(cb);
+				}
+				applyFilter();
+			}
+		});
+		
+		
 		
 		galleryContainer = new JPanel();
 		galleryContainer.setBackground(new Color(0, 191, 255));
@@ -654,6 +834,113 @@ public class RegistereduserPage extends JFrame {
 						
 						JScrollPane scrollPane = new JScrollPane(galleryIntro);
 						galleryContainer.add(scrollPane, "name_15095058194076");
+						
+						JPanel galleryDetail = new JPanel();
+						galleryContainer.add(galleryDetail, "name_3950194483962");
+						galleryDetail.setBackground(new Color(30, 144, 255));
+						galleryDetail.setLayout(null);
+						
+						JButton btnBack = new JButton("Back");
+						btnBack.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								card2.show(galleryContainer, "name_15095058194076");
+							}
+						});
+						btnBack.setBounds(0, 0, 117, 25);
+						btnBack.setBorderPainted(false);
+						btnBack.setContentAreaFilled(false);
+						galleryDetail.add(btnBack);
+						
+						JPanel panel = new JPanel();
+						panel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
+						panel.setBounds(50, 50, 200, 300);
+						galleryDetail.add(panel);
+						panel.setLayout(null);
+						
+						labelArtworkImage = new JLabel("Artwork Image");
+						labelArtworkImage.setBounds(0, 0, 200, 300);
+						labelArtworkImage.setBorder(new LineBorder(new Color(0, 0, 0), 2));
+						panel.add(labelArtworkImage);
+						
+						JLabel lblProductId = new JLabel("Product ID :-");
+						lblProductId.setBounds(300, 50, 110, 15);
+						galleryDetail.add(lblProductId);
+						
+						productID = new JLabel("New label");
+						productID.setBounds(450, 50, 140, 15);
+						galleryDetail.add(productID);
+						
+						JLabel labelName = new JLabel("Name :-");
+						labelName.setBounds(300, 80, 110, 15);
+						galleryDetail.add(labelName);
+						
+						productName = new JLabel("New label");
+						productName.setBounds(450, 80, 140, 15);
+						galleryDetail.add(productName);
+						
+						JLabel labelCat = new JLabel("Category :-");
+						labelCat.setBounds(300, 110, 110, 15);
+						galleryDetail.add(labelCat);
+						
+						productCat = new JLabel("New label");
+						productCat.setBounds(450, 110, 140, 15);
+						galleryDetail.add(productCat);
+						
+						JLabel labelArtist = new JLabel("Artist :-");
+						labelArtist.setBounds(300, 140, 110, 15);
+						galleryDetail.add(labelArtist);
+						
+						productArtist = new JLabel("New label");
+						productArtist.setBounds(450, 140, 140, 15);
+						galleryDetail.add(productArtist);
+						
+						JLabel labelPrice = new JLabel("Price :-");
+						labelPrice.setBounds(300, 170, 110, 15);
+						galleryDetail.add(labelPrice);
+						
+						productPrice = new JLabel("New label");
+						productPrice.setBounds(450, 170, 140, 15);
+						galleryDetail.add(productPrice);
+						
+						JLabel labelQty = new JLabel("Remaining :-");
+						labelQty.setBounds(300, 200, 110, 15);
+						galleryDetail.add(labelQty);
+						
+						productQty = new JLabel("New label");
+						productQty.setBounds(450, 200, 140, 15);
+						galleryDetail.add(productQty);
+						
+						JLabel labelDesc = new JLabel("Description :-");
+						labelDesc.setBounds(300, 230, 110, 15);
+						galleryDetail.add(labelDesc);
+						
+//		productDesc = new JLabel("New label");
+//		productDesc.setBounds(450, 230, 140, 15);
+						
+						productDesc=new JTextArea();
+						productDesc.setFont(new Font("Dialog", Font.BOLD, 12));
+						productDesc.setBounds(450,230,140,60);
+						productDesc.setBackground(new Color(30, 144, 255));
+						productDesc.setEditable(false);
+						galleryDetail.add(productDesc);
+						
+						btnAddCart=new JButton("Add to Cart");
+						btnAddCart.setBounds(300,308,130,40);
+						galleryDetail.add(btnAddCart);
+						btnAddCart.addActionListener(new ActionListener() {			
+							public void actionPerformed(ActionEvent e) {
+								JOptionPane.showMessageDialog(contentPane, "Added to cart");
+							}
+						});
+						
+						btnShowCart=new JButton("View Cart");
+						btnShowCart.setBounds(450,308,130,40);
+						galleryDetail.add(btnShowCart);
+						btnShowCart.addActionListener(new ActionListener() {			
+							public void actionPerformed(ActionEvent e) {
+								card.show(panel_container, "name_7426609771253");
+							}
+						});
 		
 		card_artist = new JPanel();
 		card_artist.setBackground(new Color(64, 224, 208));
