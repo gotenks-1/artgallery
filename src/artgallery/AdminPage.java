@@ -1,6 +1,7 @@
 package artgallery;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Image;
 
@@ -44,6 +45,64 @@ import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+
+import javax.swing.JScrollPane;
+
+import java.awt.Insets;
+
+
+ class Orderitems{
+	 static int or_id;
+	 Date d;
+     String uname;
+     String delivered;
+     double price;
+     String disc_coupon;
+     double finalprice;
+     double discount;
+     
+     
+     public Orderitems(int or_id,Date d,String uname,String delivered,double price,String disc_coupon,double finalprice,double discount)
+     {
+    	 this.or_id=or_id;
+    	 this.d=d;
+    	 this.uname=uname;
+    	 this.price=price;
+    	 this.delivered=delivered;
+    	 this.finalprice=finalprice;
+    	 this.disc_coupon=disc_coupon;
+    	 this.discount=discount;
+     }
+     static public int getId(int or_id)
+     {
+    	 return or_id;
+     }
+}
+ 
+ class Orderdetails{
+	 int or_id;
+	 int awork_id;
+	 int quantity;
+	 
+	 public Orderdetails(int or_id,int awork_id,int quantity)
+	 {
+		 this.or_id=or_id;
+		 this.awork_id=awork_id;
+		 this.quantity=quantity;
+	 }
+
+	public Orderdetails(int int1, String string, String string2, double double1) {
+		// TODO Auto-generated constructor stub
+	}
+	 
+ }
+ 
+ 	 
+
+
 
 public class AdminPage extends JFrame {
 
@@ -68,12 +127,20 @@ public class AdminPage extends JFrame {
 	private JTextField textField_15;
 	private JTextField textField_16;
 	private JTextField textField_17;
+	final	JComboBox comboBox_3;
+	JLabel removeimg;
+	JPanel card_order;
 	final JFileChooser fc=new JFileChooser();
 	final JFileChooser fcr=new JFileChooser();
+	final JFileChooser fcc=new JFileChooser();
 	File f,file;
 	String path;int it,lists,artworks;
 	ArrayList<Image> aImage=new ArrayList<Image>();
 	int index=0;
+	ArrayList<Orderitems> orderlists=new ArrayList<Orderitems>();
+	ArrayList<Orderdetails> showdetails=new ArrayList<Orderdetails>();
+	private JTextField textField_18;
+	private JTextField textField_19;
 	
 //	final DefaultComboBoxModel cmodel;
 	/**
@@ -199,6 +266,43 @@ public class AdminPage extends JFrame {
 		btnNewButton_6.setBounds(0, 132, 123, 23);
 		panel.add(btnNewButton_6);
 		
+		JButton btnViewOrders = new JButton("View orders");
+		
+		btnViewOrders.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			//addorder(Orderitems o,int j);
+				
+				
+			cd.show(panel_1,"name_48452958741380");
+			}
+
+			public void getorder() {
+				try{
+					PreparedStatement allorders=(PreparedStatement) DBConnect.conn.prepareStatement("Select * from orders");
+				    
+					
+					ResultSet orderset=allorders.executeQuery();
+					//Orderitems odd= new Orderitems();
+				//	Orderitems.getId(orderset.getInt(1));
+					while(orderset.next())
+					{
+						Orderitems od=new Orderitems(orderset.getInt(1),orderset.getDate(2),orderset.getString(3),orderset.getString(4),orderset.getDouble(5),orderset.getString(6),orderset.getDouble(7),orderset.getDouble(8)); 
+					     orderlists.add(od);
+					}
+											
+				}
+				catch(Exception e){
+					JOptionPane.showMessageDialog(null,e);
+				}
+				
+			}
+		});
+		btnViewOrders.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnViewOrders.setContentAreaFilled(false);
+		btnViewOrders.setBorder(null);
+		btnViewOrders.setBounds(0, 345, 123, 23);
+		panel.add(btnViewOrders);
+		
 		
 		
 		panel_1 = new JPanel();
@@ -233,41 +337,41 @@ public class AdminPage extends JFrame {
 		panel_3.add(panel_6);
 		panel_6.setLayout(null);
 		
-		JPanel panel_2 = new JPanel();
+		final JPanel panel_2 = new JPanel();
 		panel_2.setBackground(Color.CYAN);
 		panel_1.add(panel_2, "addartists");
 		panel_2.setLayout(null);
 		
 		JLabel lblNewLabel_2 = new JLabel("Artist name :");
 		lblNewLabel_2.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
-		lblNewLabel_2.setBounds(55, 113, 109, 30);
+		lblNewLabel_2.setBounds(25, 111, 109, 30);
 		panel_2.add(lblNewLabel_2);
 		
 		JLabel lblDescription = new JLabel("Description :");
 		lblDescription.setHorizontalAlignment(SwingConstants.LEFT);
 		lblDescription.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
-		lblDescription.setBounds(55, 186, 109, 30);
+		lblDescription.setBounds(25, 166, 109, 30);
 		panel_2.add(lblDescription);
 		
 		JLabel lblContact = new JLabel("contact :");
 		lblContact.setHorizontalAlignment(SwingConstants.LEFT);
 		lblContact.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
-		lblContact.setBounds(55, 257, 109, 30);
+		lblContact.setBounds(25, 226, 109, 30);
 		panel_2.add(lblContact);
 		
 		textField = new JTextField();
-		textField.setBounds(177, 113, 236, 30);
+		textField.setBounds(144, 113, 155, 30);
 		panel_2.add(textField);
 		textField.setColumns(10);
 		
 		textField_1 = new JTextField();
 		textField_1.setColumns(10);
-		textField_1.setBounds(177, 186, 236, 30);
+		textField_1.setBounds(144, 168, 155, 30);
 		panel_2.add(textField_1);
 		
 		textField_2 = new JTextField();
 		textField_2.setColumns(10);
-		textField_2.setBounds(177, 257, 236, 30);
+		textField_2.setBounds(144, 228, 155, 30);
 		panel_2.add(textField_2);
 		
 		JButton btnAddDetails = new JButton("Add details");
@@ -275,12 +379,20 @@ public class AdminPage extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				try{
 				String a_name=textField.getText();
-				String des=textField.getText();
-				String contact=textField.getText();
+				String des=textField_1.getText();
+				String contact=textField_2.getText();
+				String ratings=textField_18.getText();
+				String max_rat=textField_19.getText();
 				
-				DBConnect.addartist.setString(1,a_name);
+			FileInputStream imginput=new FileInputStream(fcc.getSelectedFile());
+						
+			   DBConnect.addartist.setString(1,a_name);
 				DBConnect.addartist.setString(2,des);
 				DBConnect.addartist.setString(3,contact);
+				//DBConnect.addartist.setString(4,contact);
+				DBConnect.addartist.setString(4,ratings);
+				DBConnect.addartist.setString(5,max_rat);
+				DBConnect.addartist.setBlob(6, imginput);
 				
 				DBConnect.addartist.executeUpdate();
 				JOptionPane.showMessageDialog(null, "added");
@@ -293,7 +405,7 @@ public class AdminPage extends JFrame {
 			}
 		});
 		btnAddDetails.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
-		btnAddDetails.setBounds(386, 336, 132, 39);
+		btnAddDetails.setBounds(444, 360, 132, 39);
 		panel_2.add(btnAddDetails);
 		
 		JLabel lblNewLabel_4 = new JLabel("Add new artist");
@@ -301,6 +413,52 @@ public class AdminPage extends JFrame {
 		lblNewLabel_4.setFont(new Font("Algerian", Font.PLAIN, 25));
 		lblNewLabel_4.setBounds(134, 11, 332, 57);
 		panel_2.add(lblNewLabel_4);
+		
+		final JLabel arimage = new JLabel("");
+		arimage.setBounds(423, 84, 153, 130);
+		panel_2.add(arimage);
+		
+		JButton btnUploadImage = new JButton("Upload image");
+		btnUploadImage.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int artistimage=fcc.showOpenDialog(panel_2);
+				if(artistimage==JFileChooser.APPROVE_OPTION)
+				{
+					File f=fcc.getSelectedFile();
+					String p=f.getPath();
+					ImageIcon icon=new ImageIcon((new ImageIcon(fcc.getSelectedFile().getPath()).getImage().getScaledInstance(arimage.getHeight(), arimage.getWidth(), Image.SCALE_DEFAULT)));
+				    arimage.setIcon(icon);
+				}
+				
+						
+				
+			}
+		});
+		btnUploadImage.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
+		btnUploadImage.setBounds(423, 225, 153, 30);
+		panel_2.add(btnUploadImage);
+		
+		JLabel lblRating_1 = new JLabel("Rating :");
+		lblRating_1.setHorizontalAlignment(SwingConstants.LEFT);
+		lblRating_1.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
+		lblRating_1.setBounds(25, 279, 109, 30);
+		panel_2.add(lblRating_1);
+		
+		JLabel lblMaxArting = new JLabel("Max arting :");
+		lblMaxArting.setHorizontalAlignment(SwingConstants.LEFT);
+		lblMaxArting.setFont(new Font("Berlin Sans FB", Font.PLAIN, 16));
+		lblMaxArting.setBounds(25, 336, 109, 30);
+		panel_2.add(lblMaxArting);
+		
+		textField_18 = new JTextField();
+		textField_18.setColumns(10);
+		textField_18.setBounds(144, 286, 155, 30);
+		panel_2.add(textField_18);
+		
+		textField_19 = new JTextField();
+		textField_19.setColumns(10);
+		textField_19.setBounds(144, 336, 155, 30);
+		panel_2.add(textField_19);
 		
 		JPanel panel_7 = new JPanel();
 		panel_7.setBackground(new Color(255, 192, 203));
@@ -338,6 +496,7 @@ public class AdminPage extends JFrame {
 		panel_7.add(lblEnterArtistId);
 		
 		
+				
 		
 		final JComboBox comboBox = new JComboBox();
 		ArrayList<String> arr=new ArrayList<String>();
@@ -365,8 +524,10 @@ public class AdminPage extends JFrame {
 				DBConnect.removeartist.setInt(1,it);
 //				System.out.println(DBConnect.removeartist.executeQ);
 				
+				
 				ResultSet rs=DBConnect.removeartist.executeQuery();
-
+				
+				
 				boolean st= rs.next();
 				
 				if(st)
@@ -375,7 +536,14 @@ public class AdminPage extends JFrame {
 					textField_3.setText(rs.getObject(2).toString());
 					textField_4.setText(rs.getObject(3).toString());
 					textField_5.setText(rs.getObject(4).toString());
-                    textField_6.setText(""+rs.getObject(5).toString());
+					int rat=rs.getInt((Integer) rs.getObject(5));
+					int max_rat=rs.getInt(6);
+					double ratings=rat*100.0/max_rat/20;
+                    textField_6.setText(String.format("%.2g/5.0", ratings+0.05));
+                   
+                   // byte img[]=rs.getBytes(7);
+                    removeimg.setIcon(new ImageIcon(new ImageIcon(rs.getBytes(7)).getImage().getScaledInstance(removeimg.getWidth(), removeimg.getHeight(),Image.SCALE_DEFAULT)));
+                    
                   
 				}
 				
@@ -460,6 +628,10 @@ public class AdminPage extends JFrame {
 		btnNewButton_1.setBounds(395, 348, 158, 33);
 		panel_7.add(btnNewButton_1);
 		
+		removeimg = new JLabel("");
+		removeimg.setBounds(431, 84, 150, 132);
+		panel_7.add(removeimg);
+		
 		final JPanel panel_8 = new JPanel();
 		panel_8.setBackground(new Color(173, 255, 47));
 		panel_1.add(panel_8, "addartworks");
@@ -540,7 +712,8 @@ public class AdminPage extends JFrame {
 					DBConnect.addartwork.setString(1,details);
 					DBConnect.addartwork.setString(2,art_name);
 					DBConnect.addartwork.setDouble(3,price);
-					DBConnect.addartwork.setInt(4,it);
+					DBConnect.addartwork.setInt(4,Integer.parseInt(comboBox_3.getSelectedItem().toString()));
+					System.out.println(comboBox_3.getSelectedItem().toString());
 					DBConnect.addartwork.setString(5,cat);
 					DBConnect.addartwork.setBlob(6,fimage);
 					
@@ -569,7 +742,7 @@ public class AdminPage extends JFrame {
 		panel_8.add(lblEnterArtistid);
 		
 		
-	final	JComboBox comboBox_3 = new JComboBox();
+	comboBox_3 = new JComboBox();
 	ArrayList<String> arry=new ArrayList<String>();
 	try
 	{     
@@ -903,5 +1076,85 @@ public class AdminPage extends JFrame {
 		btnNewButton_5.setFont(new Font("Berlin Sans FB", Font.PLAIN, 18));
 		btnNewButton_5.setBounds(430, 362, 142, 37);
 		panel_10.add(btnNewButton_5);
+		
+		
+			
+		
+		JPanel panel_11 = new JPanel();
+		panel_11.setBackground(new Color(138, 43, 226));
+		JScrollPane scrollOrder=new JScrollPane(panel_11);
+		
+		GridBagLayout gbl_panel_11 = new GridBagLayout();
+		gbl_panel_11.columnWidths = new int[]{608};
+		
+		
+		
+		int orderrow=orderlists.size();
+		int[] getheightofrow=new int[orderrow];
+		for(int i1=0;i1<orderrow;i1++)
+		{
+			getheightofrow[i1]=200;
+			System.out.println("i am called");
+		}
+		
+		gbl_panel_11.rowHeights =getheightofrow;
+	//	gbl_panel_11.columnWeights = new double[]{Double.MIN_VALUE};
+		//gbl_panel_11.rowWeights = new double[]{Double.MIN_VALUE};
+		panel_11.setPreferredSize(new Dimension(608,200*orderrow));
+		panel_11.setLayout(gbl_panel_11);
+		
+		
+		panel_1.add(scrollOrder, "name_48452958741380");
+		
+		for(int j=0;j<orderlists.size();j++)
+		{
+			addorder(orderlists.get(j),j);
+		}
+		
+		
+		
+		
+		//System.out.println(panel_12.getPreferredSize());
 	}
+	
+	
+
+	 void addorder(Orderitems o, int j) {
+		//int y=j/3;
+		
+		JPanel mPanel=new JPanel();
+		mPanel.setLayout(null);
+//		mPanel.setMaximumSize(new Dimension(608,200));
+		card_order.add(mPanel);
+		
+		
+		JLabel orderid=new JLabel("orderID");
+		orderid.setBounds(0,0,100,50);
+		card_order.add(orderid);
+		
+//		JLabel date=new JLabel("Date");
+//		orderid.setBounds(50,50,100,50);
+//		card_order.add(date);
+//
+//		JLabel name=new JLabel("username");
+//		orderid.setBounds(50,50,100,50);
+//		card_order.add(name);
+//		
+//		JLabel price=new JLabel("PRICE :");
+//		orderid.setBounds(50,50,100,50);
+//		card_order.add(price);
+
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.insets = new Insets(0, 0, 5, 5);
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.gridx = 0;
+		gbc_panel.gridy = j;
+		card_order.add(mPanel, gbc_panel);
+			
+		}
+
+//	 void getorders(Orderitems orderitems) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

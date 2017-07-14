@@ -22,7 +22,7 @@ public class DBConnect {
 			Class.forName("com.mysql.jdbc.Driver");
 			 conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/artgallery","root","");
 			 smt=conn.createStatement();
-			 addartist=conn.prepareStatement("insert into artist(name,description,contact) values(?,?,?)");
+			 addartist=conn.prepareStatement("insert into artist(name,description,contact,rating,max_rating,image) values(?,?,?,?,?,?)");
 			 addadmin=conn.prepareStatement("insert into adminlogin values(?,?,?,?)");
 			 removeartist=conn.prepareStatement("select * from artist where art_id=?");
 			 remove_artist=conn.prepareStatement("delete from artist where art_id=?");
