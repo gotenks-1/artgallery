@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
 
+import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -44,6 +45,7 @@ import javax.swing.JTextArea;
 import javax.swing.border.LineBorder;
 import java.awt.Font;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
 
 
 class Cart{
@@ -224,6 +226,14 @@ public class RegistereduserPage extends JFrame {
 	Timer sliderTimer=new Timer();
 	int indexSlider=0;
 	JLabel lblSlider;
+	private JTextField tfProfileName;
+	private JTextField tfProfileEmail;
+	private JTextField tfProfileMob;
+	private JTextField tfProfileAdd;
+	private JTextField tfProfilePincode;
+	private JTextField tfProfilesq;
+	private JTextField tfProfilesa;
+	JLabel lblProfileUsername;
 //	static ArtworkNode artwork1;
 	/**
 	 * Launch the application.
@@ -907,7 +917,7 @@ public class RegistereduserPage extends JFrame {
 					lblSlider.setIcon(ic);
 					
 				}
-			}, 2000, 2000);
+			}, 1, 2000);
 			
 			
 		} catch (SQLException e) {
@@ -998,6 +1008,7 @@ public class RegistereduserPage extends JFrame {
 		}else{
 		btnProfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				setupProfile();
 				card.show(panel_container, "name_7410583295410");
 			}
 		});}
@@ -1325,6 +1336,116 @@ public class RegistereduserPage extends JFrame {
 		JPanel card_profile = new JPanel();
 		card_profile.setBackground(new Color(0, 250, 154));
 		panel_container.add(card_profile, "name_7410583295410");
+		card_profile.setLayout(null);
+		
+		lblProfileUsername = new JLabel("");
+		lblProfileUsername.setBounds(615, 20, 90, 15);
+		card_profile.add(lblProfileUsername);
+		
+		JLabel lblWelcome = new JLabel("Welcome ! ");
+		lblWelcome.setBounds(525, 20, 100, 15);
+		card_profile.add(lblWelcome);
+		
+		JLabel lblName = new JLabel("Name :-");
+		lblName.setBounds(147, 105, 140, 20);
+		card_profile.add(lblName);
+		
+		tfProfileName = new JTextField();
+		tfProfileName.setBounds(363, 105, 180, 20);
+		card_profile.add(tfProfileName);
+		tfProfileName.setColumns(10);
+		
+		JLabel lblNewLabel_4 = new JLabel("Email :-");
+		lblNewLabel_4.setBounds(147, 140, 140, 20);
+		card_profile.add(lblNewLabel_4);
+		
+		JLabel lblMobile = new JLabel("Mobile :-");
+		lblMobile.setBounds(147, 175, 140, 20);
+		card_profile.add(lblMobile);
+		
+		JLabel lblAddress = new JLabel("Address :-");
+		lblAddress.setBounds(147, 210, 140, 20);
+		card_profile.add(lblAddress);
+		
+		JLabel lblPincode = new JLabel("Pincode :-");
+		lblPincode.setBounds(147, 245, 140, 20);
+		card_profile.add(lblPincode);
+		
+		JLabel lblSwcurityQuestion = new JLabel("Security question :-");
+		lblSwcurityQuestion.setBounds(147, 280, 140, 20);
+		card_profile.add(lblSwcurityQuestion);
+		
+		JLabel lblSecurityAnswer = new JLabel("Security answer :-");
+		lblSecurityAnswer.setBounds(147, 315, 140, 20);
+		card_profile.add(lblSecurityAnswer);
+		
+		tfProfileEmail = new JTextField();
+		tfProfileEmail.setColumns(10);
+		tfProfileEmail.setBounds(363, 140, 180, 20);
+		card_profile.add(tfProfileEmail);
+		
+		tfProfileMob = new JTextField();
+		tfProfileMob.setColumns(10);
+		tfProfileMob.setBounds(363, 175, 180, 20);
+		card_profile.add(tfProfileMob);
+		
+		tfProfileAdd = new JTextField();
+		tfProfileAdd.setColumns(10);
+		tfProfileAdd.setBounds(363, 210, 180, 20);
+		card_profile.add(tfProfileAdd);
+		
+		tfProfilePincode = new JTextField();
+		tfProfilePincode.setColumns(10);
+		tfProfilePincode.setBounds(363, 245, 180, 20);
+		card_profile.add(tfProfilePincode);
+		
+		tfProfilesq = new JTextField();
+		tfProfilesq.setColumns(10);
+		tfProfilesq.setBounds(363, 280, 180, 20);
+		card_profile.add(tfProfilesq);
+		
+		tfProfilesa = new JTextField();
+		tfProfilesa.setColumns(10);
+		tfProfilesa.setBounds(363, 315, 180, 20);
+		card_profile.add(tfProfilesa);
+		
+		JButton btnProfileUpdate = new JButton("UPDATE");
+		btnProfileUpdate.setBounds(426, 359, 117, 25);
+		card_profile.add(btnProfileUpdate);
+		btnProfileUpdate.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String puser=lblProfileUsername.getText();
+				String pname=tfProfileName.getText();
+				String padd=tfProfileAdd.getText();
+				String pemail=tfProfileEmail.getText();
+				String pmob=tfProfileMob.getText();
+				int ppin=Integer.parseInt(tfProfilePincode.getText());
+				String psa=tfProfilesa.getText();
+				String psq=tfProfilesq.getText();
+				
+				try {
+				int x=DBConnect.conn.prepareStatement("update users set"
+							+ " username='"+puser+"',"
+									+ "sq='"+psq+"',"
+											+ "sq_ans='"+psa+"',"
+													+ "name='"+pname+"',"
+															+ "address='"+padd+"',"
+																	+ "mob="+pmob+","
+																			+ "email='"+pemail+"',"
+																					+ "pin_code="+ppin+" where "
+																							+ "username='"+puser+"'").executeUpdate();
+				if(x!=PreparedStatement.EXECUTE_FAILED){
+					JOptionPane.showMessageDialog(contentPane, "Update Success");
+					setupProfile();
+				}
+				
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		
 		card_cart = new JPanel();
 		cartScroll=new JScrollPane(card_cart);
@@ -1339,6 +1460,25 @@ public class RegistereduserPage extends JFrame {
 			}
 		}, 2);
 		
+	}
+	
+	void setupProfile(){
+		try {
+			ResultSet rs=DBConnect.conn.prepareStatement("select * from users where username='"+username+"'").executeQuery();
+			if(rs.next()){
+				lblProfileUsername.setText(rs.getString(1)+"");
+				tfProfileName.setText(rs.getString(5)+"");
+				tfProfileAdd.setText(rs.getString(6)+"");
+				tfProfileEmail.setText(rs.getString(8)+"");
+				tfProfileMob.setText(rs.getLong(7)+"");
+				tfProfilePincode.setText(rs.getInt(9)+"");
+				tfProfilesa.setText(rs.getString(4)+"");
+				tfProfilesq.setText(rs.getString(3)+"");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
