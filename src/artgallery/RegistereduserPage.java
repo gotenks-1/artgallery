@@ -26,6 +26,7 @@ import java.awt.Dimension;
 
 import javax.swing.border.EtchedBorder;
 import java.awt.event.ActionListener;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +46,92 @@ import java.awt.Font;
 import javax.swing.JComboBox;
 
 
+class Cart{
+	ArrayList<CartItem> cartItems=new ArrayList<CartItem>();
+	double totalPrice;
+	String discountCoupon="nocoupen";
+	int discountper=0;
+	double discount;
+	double pricePay;
+	
+	void addItem(CartItem ci){
+		boolean toAdd=true;
+		for(CartItem c: cartItems){
+			if(c.item.id==ci.item.id){
+				c.qty++;
+				toAdd=false;
+				break;
+			}
+		}
+		if(toAdd)
+			cartItems.add(ci);
+		totalPrice+=ci.item.price;
+		reApplyDiscount(discountCoupon);
+		
+	}
+	
+	void reApplyDiscount(String ccode){
+		pricePay=totalPrice;
+					discount=totalPrice*discountper/100;
+					pricePay=totalPrice-discount;
+					
+	}
+	
+	void remove(CartItem ci){
+		if(cartItems.contains(ci)){
+			int index=cartItems.indexOf(ci);
+			CartItem c=cartItems.get(index);
+			totalPrice-=c.item.price*c.qty;
+			cartItems.remove(index);
+			reApplyDiscount(discountCoupon);
+		}
+	}
+	
+	void applyDiscount(String ccode){
+		pricePay=totalPrice;
+		try {
+			ResultSet rs=DBConnect.conn.prepareStatement("select * from discount where coupon_code='"+ccode+"'").executeQuery();
+			if(rs.next()){
+				String status=rs.getString(3);
+				if(status.equals("yes")){
+					JOptionPane.showMessageDialog(null, "Code is alredy used.");
+				}else{
+					int dis=rs.getInt(2);
+					discountper=dis;
+					discount=totalPrice*dis/100;
+					pricePay=totalPrice-discount;
+					DBConnect.conn.prepareStatement("update discount set used_or_not='yes' where coupon_code='"+ccode+"'").executeUpdate();
+					JOptionPane.showMessageDialog(null, "Coupon code applied.Discount of "+dis+"% added.Refresh cart to view cshanges.");
+				}
+			}else{
+				JOptionPane.showMessageDialog(null, "Invalid Code");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+class CartItem implements Comparable<CartItem>{
+	ArtworkNode item;
+	int qty;
+	
+	public CartItem(ArtworkNode item,int qty){
+		this.item=item;
+		this.qty=qty;
+	}
+
+	public int compareTo(CartItem node) {
+		return this.item.id-node.item.id;
+	}
+	
+	public boolean equals(CartItem c){
+		if(this.item.id==c.item.id)
+			return true;
+		else
+			return false;
+	}
+}
 
 class ArtistNode{
 	int id;
@@ -74,7 +161,7 @@ class ArtworkNode{
 	int id;
 	String details;
 	String name;
-	float price;
+	double price;
 	int artist_id;
 	int qty_left;
 	int sold;
@@ -121,6 +208,8 @@ public class RegistereduserPage extends JFrame {
 	JPanel card_artist;
 	JPanel galleryIntro;
 	JPanel galleryContainer;
+	JPanel card_cart;
+	JScrollPane cartScroll;
 	private ArrayList<ArtistNode> artistList=new ArrayList<ArtistNode>();
 	private ArrayList<ArtworkNode> artworkList=new ArrayList<ArtworkNode>();
 	private ArrayList<JCheckBox> categoryList=new ArrayList<JCheckBox>();
@@ -129,10 +218,177 @@ public class RegistereduserPage extends JFrame {
 	private ArrayList<String> filterArtistList=new ArrayList<String>();
 	boolean catFilter=false;
 	boolean artistFilter=false;
+	Cart myCart=new Cart();
+	JPanel galleryDetail;
 //	static ArtworkNode artwork1;
 	/**
 	 * Launch the application.
 	 */
+	
+	
+	void addAllCarttoPanel(){
+		card_cart.removeAll();
+		
+		GridBagLayout gbl_galleryIntro=new GridBagLayout();
+		int noofrowsartwork=myCart.cartItems.size()+1;
+		int artworkrowheightarray[]=new int[noofrowsartwork];
+		for(int i=0;i<noofrowsartwork;i++)
+			artworkrowheightarray[i]=170;
+		gbl_galleryIntro.columnWidths=new int[]{731};
+		gbl_galleryIntro.rowHeights=artworkrowheightarray;
+		card_cart.setPreferredSize(new Dimension(445,noofrowsartwork*170));
+		card_cart.setLayout(gbl_galleryIntro);
+		
+		for(int i=0;i<myCart.cartItems.size();i++){
+			addCartItemtoPanel(myCart.cartItems.get(i),i);
+			
+		}
+		
+		addLastCartItemtoPanel();
+		
+		card_cart.revalidate();
+		card_cart.repaint();
+	}
+	
+	void addLastCartItemtoPanel(){
+		JPanel mainItemPanel=new JPanel();
+		mainItemPanel.setBounds(0, 0, 731, 170);
+		mainItemPanel.setLayout(null);
+		
+		if(myCart.cartItems.size()<=0){
+			JLabel lblItemID=new JLabel("No items in cart");
+			lblItemID.setBounds(200, 10, 400, 20);
+			mainItemPanel.add(lblItemID);
+			
+			GridBagConstraints gbc=new GridBagConstraints();
+			gbc.insets=new Insets(0, 5, 5, 5);
+			gbc.gridx=0;
+			gbc.gridy=0;
+			gbc.fill=GridBagConstraints.BOTH;
+			
+//			System.out.println("added last item");
+			
+			card_cart.add(mainItemPanel, gbc);
+			return;
+		}
+		
+		JLabel lblTPrice=new JLabel("Total Price :- ");
+		lblTPrice.setBounds(20, 10, 150, 20);
+		mainItemPanel.add(lblTPrice);
+		
+		JLabel lblTPrice1=new JLabel(String.format("%.2f", myCart.totalPrice));
+		lblTPrice1.setBounds(500, 10, 150, 20);
+		mainItemPanel.add(lblTPrice1);
+		
+		JLabel lblDiscount=new JLabel("Discount Percent :- ");
+		lblDiscount.setBounds(20, 40, 150, 20);
+		mainItemPanel.add(lblDiscount);
+		
+		JLabel lblDiscount1=new JLabel(""+myCart.discountper+"%");
+		lblDiscount1.setBounds(500, 40, 150, 20);
+		mainItemPanel.add(lblDiscount1);
+		
+		JLabel lblDisCoupen=new JLabel("Total Discount :- ");
+		lblDisCoupen.setBounds(20, 70, 150, 20);
+		mainItemPanel.add(lblDisCoupen);
+		
+		JLabel lblDisCoupen1=new JLabel(String.format("%.2f", myCart.discount));
+		lblDisCoupen1.setBounds(500, 70, 150, 20);
+		mainItemPanel.add(lblDisCoupen1);
+		
+		JLabel lblTotalPay=new JLabel("Final Amount :- ");
+		lblTotalPay.setBounds(20, 100, 150, 20);
+		mainItemPanel.add(lblTotalPay);
+		
+		JLabel lblTotalPay1=new JLabel(String.format("%.2f", myCart.pricePay));
+		lblTotalPay1.setBounds(500, 100, 150, 20);
+		mainItemPanel.add(lblTotalPay1);
+		
+		JButton btnApplyDiscount=new JButton("Apply Discount Coupon");
+		btnApplyDiscount.setBounds(20, 130, 250, 25);
+		mainItemPanel.add(btnApplyDiscount);
+		btnApplyDiscount.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				String s=JOptionPane.showInputDialog(contentPane,"Enter Coupon Code");
+				myCart.applyDiscount(s);
+			}
+		});
+		
+		GridBagConstraints gbc=new GridBagConstraints();
+		gbc.insets=new Insets(0, 5, 5, 5);
+		gbc.gridx=0;
+		gbc.gridy=myCart.cartItems.size();
+		gbc.fill=GridBagConstraints.BOTH;
+		
+		card_cart.add(mainItemPanel, gbc);
+		
+	}
+	
+	
+	void addCartItemtoPanel(final CartItem ci,int i){
+		JPanel mainItemPanel=new JPanel();
+		mainItemPanel.setBounds(0, 0, 731, 0);
+		mainItemPanel.setLayout(null);
+		
+		JLabel lblImage=new JLabel();
+		lblImage.setBounds(10, 10, 150, 150);
+		lblImage.setIcon(new ImageIcon(new ImageIcon(ci.item.icon).getImage().getScaledInstance(lblImage.getWidth(), lblImage.getHeight(), Image.SCALE_SMOOTH)));
+		mainItemPanel.add(lblImage);
+		
+		JLabel lblItemID=new JLabel("Item Id:-");
+		lblItemID.setBounds(200, 10, 100, 20);
+		mainItemPanel.add(lblItemID);
+		
+		JLabel lblItemID1=new JLabel(""+ci.item.id);
+		lblItemID1.setBounds(320, 10, 100, 20);
+		mainItemPanel.add(lblItemID1);
+		
+		JLabel lblItemName=new JLabel("Name:-");
+		lblItemName.setBounds(200, 50, 100, 20);
+		mainItemPanel.add(lblItemName);
+		
+		JLabel lblItemName1=new JLabel(""+ci.item.name);
+		lblItemName1.setBounds(320, 50, 100, 20);
+		mainItemPanel.add(lblItemName1);
+		
+		JLabel lblItemQty=new JLabel("Quantity:-");
+		lblItemQty.setBounds(200, 90, 100, 20);
+		mainItemPanel.add(lblItemQty);
+		
+		JLabel lblItemQty1=new JLabel(""+ci.qty);
+		lblItemQty1.setBounds(320, 90, 100, 20);
+		mainItemPanel.add(lblItemQty1);
+		
+		JLabel lblItemPrice=new JLabel("Price:-");
+		lblItemPrice.setBounds(200, 130, 100, 20);
+		mainItemPanel.add(lblItemPrice);
+		
+		JLabel lblItemPrice1=new JLabel(""+ci.qty+" * "+String.format("%.2f", ci.item.price)+" = "+String.format("%.2f", ci.item.price*ci.qty));
+		lblItemPrice1.setBounds(320, 130, 300, 20);
+		mainItemPanel.add(lblItemPrice1);
+		
+		JButton btnRemove=new JButton("Remove");
+		btnRemove.setBounds(550,10,150,60);
+		mainItemPanel.add(btnRemove);
+		btnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				myCart.remove(ci);
+				addAllCarttoPanel();
+				card.show(panel_container, "name_7426609771253");
+			}
+		});
+		
+		GridBagConstraints gbc=new GridBagConstraints();
+		gbc.insets=new Insets(0, 5, 5, 5);
+		gbc.gridx=0;
+		gbc.gridy=i;
+		gbc.fill=GridBagConstraints.BOTH;
+		
+		card_cart.add(mainItemPanel, gbc);
+	}
+	
+	
 	
 	void generateArtistList(){
 		cbArtistList.clear();
@@ -218,11 +474,11 @@ public class RegistereduserPage extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						if(cb.isSelected()){
 							filterCatList.add(cb.getText());
-							System.out.println("added "+cb.getText());
+//							System.out.println("added "+cb.getText());
 						}
 						else{
 							filterCatList.remove(cb.getText());
-							System.out.println("removed "+cb.getText());
+//							System.out.println("removed "+cb.getText());
 						}
 					}
 				});
@@ -298,7 +554,19 @@ public class RegistereduserPage extends JFrame {
 		}
 	}
 	
-	void addProductDetail(ArtworkNode artwork1){
+	void addProductDetail(final ArtworkNode artwork1){
+		
+		btnAddCart=new JButton("Add to Cart");
+		btnAddCart.setBounds(300,308,130,40);
+		galleryDetail.add(btnAddCart);
+		btnAddCart.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent e) {
+				myCart.addItem(new CartItem(artwork1, 1));
+				JOptionPane.showMessageDialog(contentPane, "Added to cart");
+			}
+		});
+		
+		
 		productID.setText(""+artwork1.id+"");
 		productName.setText(artwork1.name);
 		productDesc.setText(artwork1.details);
@@ -363,13 +631,14 @@ public class RegistereduserPage extends JFrame {
 		for(int i=0;i<noofrowsartwork;i++)
 			artworkrowheightarray[i]=300;
 		gbl_galleryIntro.rowHeights=artworkrowheightarray;
-		galleryIntro.setPreferredSize(new Dimension(445,noofrowsartwork*300>450?noofrowsartwork*300:450));
+		galleryIntro.setPreferredSize(new Dimension(445,noofrowsartwork*300));
 		galleryIntro.setLayout(gbl_galleryIntro);
 		
 		for(int i=0;i<artworkList.size();i++){
 			addArtworktoPanel(artworkList.get(i),i);
 			
 		}
+		galleryIntro.revalidate();
 		galleryIntro.repaint();
 	}
 	
@@ -431,6 +700,7 @@ public class RegistereduserPage extends JFrame {
 		}
 		btnAddCart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				myCart.addItem(new CartItem(artwork, 1));
 				JOptionPane.showMessageDialog(contentPane, "Item added to cart");
 			}
 		});
@@ -666,6 +936,7 @@ public class RegistereduserPage extends JFrame {
 		panel_controls.add(btnArtist);
 		
 		JButton btnProfile = new JButton("Profile");
+		
 		btnProfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				card.show(panel_container, "name_7410583295410");
@@ -676,16 +947,19 @@ public class RegistereduserPage extends JFrame {
 		JButton btnMyCart = new JButton("My Cart");
 		btnMyCart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				addAllCarttoPanel();
 				card.show(panel_container, "name_7426609771253");
 			}
 		});
 		panel_controls.add(btnMyCart);
 		
 		JButton btnLogout = new JButton("Logout");
+		if(username.equals("guest"))
+			btnLogout.setText("Login");
 		btnLogout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				username="guest";
-				MainPage.main(new String[]{""});
+				LoginPage.main(new String[]{""});
 				dispose();
 			}
 		});
@@ -835,7 +1109,7 @@ public class RegistereduserPage extends JFrame {
 						JScrollPane scrollPane = new JScrollPane(galleryIntro);
 						galleryContainer.add(scrollPane, "name_15095058194076");
 						
-						JPanel galleryDetail = new JPanel();
+						galleryDetail = new JPanel();
 						galleryContainer.add(galleryDetail, "name_3950194483962");
 						galleryDetail.setBackground(new Color(30, 144, 255));
 						galleryDetail.setLayout(null);
@@ -924,14 +1198,6 @@ public class RegistereduserPage extends JFrame {
 						productDesc.setEditable(false);
 						galleryDetail.add(productDesc);
 						
-						btnAddCart=new JButton("Add to Cart");
-						btnAddCart.setBounds(300,308,130,40);
-						galleryDetail.add(btnAddCart);
-						btnAddCart.addActionListener(new ActionListener() {			
-							public void actionPerformed(ActionEvent e) {
-								JOptionPane.showMessageDialog(contentPane, "Added to cart");
-							}
-						});
 						
 						btnShowCart=new JButton("View Cart");
 						btnShowCart.setBounds(450,308,130,40);
@@ -997,9 +1263,10 @@ public class RegistereduserPage extends JFrame {
 		card_profile.setBackground(new Color(0, 250, 154));
 		panel_container.add(card_profile, "name_7410583295410");
 		
-		JPanel card_cart = new JPanel();
+		card_cart = new JPanel();
+		cartScroll=new JScrollPane(card_cart);
 		card_cart.setBackground(new Color(100, 149, 237));
-		panel_container.add(card_cart, "name_7426609771253");
+		panel_container.add(cartScroll, "name_7426609771253");
 		
 		new Timer().schedule(new TimerTask() {
 			public void run() {
