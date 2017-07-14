@@ -130,6 +130,7 @@ public class AdminPage extends JFrame {
 	final	JComboBox comboBox_3;
 	JLabel removeimg;
 	JPanel card_order;
+	JPanel panel_11;
 	final JFileChooser fc=new JFileChooser();
 	final JFileChooser fcr=new JFileChooser();
 	final JFileChooser fcc=new JFileChooser();
@@ -163,6 +164,29 @@ public class AdminPage extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	public void getorder() {
+		try{
+			PreparedStatement allorders=(PreparedStatement) DBConnect.conn.prepareStatement("Select * from orders");
+		    
+			
+			ResultSet orderset=allorders.executeQuery();
+			//Orderitems odd= new Orderitems();
+		//	Orderitems.getId(orderset.getInt(1));
+			while(orderset.next())
+			{
+				Orderitems od=new Orderitems(orderset.getInt(1),orderset.getDate(2),orderset.getString(3),orderset.getString(4),orderset.getDouble(5),orderset.getString(6),orderset.getDouble(7),orderset.getDouble(8)); 
+			     orderlists.add(od);
+			     System.out.println("added");
+			}
+									
+		}
+		catch(Exception e){
+			JOptionPane.showMessageDialog(null,e);
+		}
+		
+	}
+	
+	
 	public AdminPage() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100,731,445);
@@ -276,27 +300,12 @@ public class AdminPage extends JFrame {
 			cd.show(panel_1,"name_48452958741380");
 			}
 
-			public void getorder() {
-				try{
-					PreparedStatement allorders=(PreparedStatement) DBConnect.conn.prepareStatement("Select * from orders");
-				    
-					
-					ResultSet orderset=allorders.executeQuery();
-					//Orderitems odd= new Orderitems();
-				//	Orderitems.getId(orderset.getInt(1));
-					while(orderset.next())
-					{
-						Orderitems od=new Orderitems(orderset.getInt(1),orderset.getDate(2),orderset.getString(3),orderset.getString(4),orderset.getDouble(5),orderset.getString(6),orderset.getDouble(7),orderset.getDouble(8)); 
-					     orderlists.add(od);
-					}
-											
-				}
-				catch(Exception e){
-					JOptionPane.showMessageDialog(null,e);
-				}
-				
-			}
+			
 		});
+		
+		
+		
+		
 		btnViewOrders.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnViewOrders.setContentAreaFilled(false);
 		btnViewOrders.setBorder(null);
@@ -1080,13 +1089,13 @@ public class AdminPage extends JFrame {
 		
 			
 		
-		JPanel panel_11 = new JPanel();
+		panel_11 = new JPanel();
 		panel_11.setBackground(new Color(138, 43, 226));
 		JScrollPane scrollOrder=new JScrollPane(panel_11);
 		
 		GridBagLayout gbl_panel_11 = new GridBagLayout();
-		gbl_panel_11.columnWidths = new int[]{608};
-		
+		gbl_panel_11.columnWidths = new int[]{606};
+		getorder();
 		
 		
 		int orderrow=orderlists.size();
@@ -1100,7 +1109,7 @@ public class AdminPage extends JFrame {
 		gbl_panel_11.rowHeights =getheightofrow;
 	//	gbl_panel_11.columnWeights = new double[]{Double.MIN_VALUE};
 		//gbl_panel_11.rowWeights = new double[]{Double.MIN_VALUE};
-		panel_11.setPreferredSize(new Dimension(608,200*orderrow));
+		panel_11.setPreferredSize(new Dimension(600,200*orderrow));
 		panel_11.setLayout(gbl_panel_11);
 		
 		
@@ -1108,7 +1117,9 @@ public class AdminPage extends JFrame {
 		
 		for(int j=0;j<orderlists.size();j++)
 		{
+			System.out.println("added new card");
 			addorder(orderlists.get(j),j);
+			
 		}
 		
 		
@@ -1124,13 +1135,19 @@ public class AdminPage extends JFrame {
 		
 		JPanel mPanel=new JPanel();
 		mPanel.setLayout(null);
-//		mPanel.setMaximumSize(new Dimension(608,200));
-		card_order.add(mPanel);
+		
+		
+	/* Do all of your Styling in here and add elements in mPanel
+	 * Don't forget setBounds in correct order for new elements
+	 * mpanel is single card
+	 * 
+	 * */	
+		
 		
 		
 		JLabel orderid=new JLabel("orderID");
 		orderid.setBounds(0,0,100,50);
-		card_order.add(orderid);
+		mPanel.add(orderid);
 		
 //		JLabel date=new JLabel("Date");
 //		orderid.setBounds(50,50,100,50);
@@ -1144,12 +1161,18 @@ public class AdminPage extends JFrame {
 //		orderid.setBounds(50,50,100,50);
 //		card_order.add(price);
 
+		
+		/* Do Nothing beyond this point in this function
+		 * 
+		 * */
+		
+		
 		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.insets = new Insets(0, 0, 5, 5);
+		gbc_panel.insets = new Insets(0, 5, 5, 5);
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = j;
-		card_order.add(mPanel, gbc_panel);
+		panel_11.add(mPanel, gbc_panel);
 			
 		}
 
