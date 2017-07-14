@@ -220,6 +220,10 @@ public class RegistereduserPage extends JFrame {
 	boolean artistFilter=false;
 	static Cart myCart;
 	JPanel galleryDetail;
+	private ArrayList<Image> listOfTimer=new ArrayList<Image>();
+	Timer sliderTimer=new Timer();
+	int indexSlider=0;
+	JLabel lblSlider;
 //	static ArtworkNode artwork1;
 	/**
 	 * Launch the application.
@@ -885,6 +889,33 @@ public class RegistereduserPage extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	
+	void slider(){
+		try {
+			ResultSet rs=DBConnect.conn.prepareStatement("select image from artworks order by a_id desc").executeQuery();
+			while(rs.next()){
+				byte img[]=rs.getBytes(1);
+				listOfTimer.add(new ImageIcon(img).getImage());
+			}
+			
+			sliderTimer.scheduleAtFixedRate(new TimerTask() {
+				public void run() {
+					indexSlider++;
+					if(indexSlider==listOfTimer.size())
+						indexSlider=0;
+					ImageIcon ic=new ImageIcon(listOfTimer.get(indexSlider).getScaledInstance(lblSlider.getWidth(), lblSlider.getHeight(), Image.SCALE_SMOOTH));
+					lblSlider.setIcon(ic);
+					
+				}
+			}, 2000, 2000);
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public RegistereduserPage(String u_main) {
 		
 		username=u_main;
@@ -928,6 +959,7 @@ public class RegistereduserPage extends JFrame {
 		JButton btnHome = new JButton("Home");
 		btnHome.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
 				card.show(panel_container, "name_7296281800690");
 			}
 		});
@@ -1003,6 +1035,10 @@ public class RegistereduserPage extends JFrame {
 		panel_container.add(card_home, "name_7296281800690");
 		card_home.setLayout(null);
 		
+		lblSlider = new JLabel("");
+		lblSlider.setBounds(20, 30, 691, 300);
+		card_home.add(lblSlider);
+		
 		JPanel card_gallery = new JPanel();
 		card_gallery.setBackground(new Color(0, 191, 255));
 		card_gallery.setForeground(new Color(0, 0, 0));
@@ -1010,7 +1046,7 @@ public class RegistereduserPage extends JFrame {
 		card_gallery.setLayout(null);
 		
 		JPanel gallarySortByPanel = new JPanel();
-		gallarySortByPanel.setBackground(new Color(0, 255, 0));
+		gallarySortByPanel.setBackground(new Color(32, 178, 170));
 		gallarySortByPanel.setBounds(0, 0, 731, 20);
 		card_gallery.add(gallarySortByPanel);
 		gallarySortByPanel.setLayout(null);
@@ -1031,7 +1067,7 @@ public class RegistereduserPage extends JFrame {
 		gallarySortByPanel.add(lblSortBy);
 		
 		JPanel galleryFilter = new JPanel();
-		galleryFilter.setBackground(new Color(0, 255, 127));
+		galleryFilter.setBackground(new Color(32, 178, 170));
 		galleryFilter.setBounds(0, 20, 120, 450);
 		card_gallery.add(galleryFilter);
 		galleryFilter.setLayout(null);
@@ -1294,6 +1330,8 @@ public class RegistereduserPage extends JFrame {
 		cartScroll=new JScrollPane(card_cart);
 		card_cart.setBackground(new Color(100, 149, 237));
 		panel_container.add(cartScroll, "name_7426609771253");
+		
+		slider();
 		
 		new Timer().schedule(new TimerTask() {
 			public void run() {
