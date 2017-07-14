@@ -218,7 +218,7 @@ public class RegistereduserPage extends JFrame {
 	private ArrayList<String> filterArtistList=new ArrayList<String>();
 	boolean catFilter=false;
 	boolean artistFilter=false;
-	Cart myCart=new Cart();
+	static Cart myCart;
 	JPanel galleryDetail;
 //	static ArtworkNode artwork1;
 	/**
@@ -312,6 +312,22 @@ public class RegistereduserPage extends JFrame {
 				// TODO Auto-generated method stub
 				String s=JOptionPane.showInputDialog(contentPane,"Enter Coupon Code");
 				myCart.applyDiscount(s);
+			}
+		});
+		
+		JButton btnCheckout=new JButton("Proceed to checkout");
+		btnCheckout.setBounds(320, 130, 250, 25);
+		mainItemPanel.add(btnCheckout);
+		btnCheckout.addActionListener(new ActionListener() {			
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				if(username.equals("guest")){
+					JOptionPane.showMessageDialog(contentPane, "Login First to continue");
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(contentPane, "Order placed");
+				}
 			}
 		});
 		
@@ -872,6 +888,8 @@ public class RegistereduserPage extends JFrame {
 	public RegistereduserPage(String u_main) {
 		
 		username=u_main;
+		if(myCart==null)
+			myCart=new Cart();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 731, 600);
 		contentPane = new JPanel();
@@ -936,12 +954,21 @@ public class RegistereduserPage extends JFrame {
 		panel_controls.add(btnArtist);
 		
 		JButton btnProfile = new JButton("Profile");
-		
+		if(username.equals("guest")){
+			btnProfile.setText("Register");
+			btnProfile.addActionListener(new ActionListener() {				
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					LoginPage.main(new String[]{""});
+					dispose();
+				}
+			});
+		}else{
 		btnProfile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				card.show(panel_container, "name_7410583295410");
 			}
-		});
+		});}
 		panel_controls.add(btnProfile);
 		
 		JButton btnMyCart = new JButton("My Cart");
