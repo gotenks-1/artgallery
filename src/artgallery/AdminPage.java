@@ -44,6 +44,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.awt.GridBagLayout;
@@ -55,7 +56,7 @@ import java.awt.Insets;
 
 
  class Orderitems{
-	 static int or_id;
+	 int or_id;
 	 Date d;
      String uname;
      String delivered;
@@ -75,10 +76,6 @@ import java.awt.Insets;
     	 this.finalprice=finalprice;
     	 this.disc_coupon=disc_coupon;
     	 this.discount=discount;
-     }
-     static public int getId(int or_id)
-     {
-    	 return or_id;
      }
 }
  
@@ -111,6 +108,7 @@ public class AdminPage extends JFrame {
 	JPanel panel_1;
 	private JTextField textField;
 	private JTextField textField_1;
+	JLabel workimage;
 	private JTextField textField_2;
 	private JTextField textField_3;
 	private JTextField textField_4;
@@ -128,6 +126,8 @@ public class AdminPage extends JFrame {
 	private JTextField textField_16;
 	private JTextField textField_17;
 	final	JComboBox comboBox_3;
+	String username;
+	final JLabel arimage;
 	JLabel removeimg;
 	JPanel card_order;
 	JPanel panel_11;
@@ -142,29 +142,31 @@ public class AdminPage extends JFrame {
 	ArrayList<Orderdetails> showdetails=new ArrayList<Orderdetails>();
 	private JTextField textField_18;
 	private JTextField textField_19;
+	private JTextField textField_20;
 	
 //	final DefaultComboBoxModel cmodel;
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AdminPage frame = new AdminPage();
-					frame.setResizable(false);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+//	public static void main(String[] args) {
+//		EventQueue.invokeLater(new Runnable() {
+//			public void run() {
+//				try {
+//					AdminPage frame1 = new AdminPage();
+//					frame1.setResizable(false);
+//					frame1.setVisible(true);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Create the frame.
 	 */
 	public void getorder() {
+		orderlists.clear();
 		try{
 			PreparedStatement allorders=(PreparedStatement) DBConnect.conn.prepareStatement("Select * from orders");
 		    
@@ -175,8 +177,13 @@ public class AdminPage extends JFrame {
 			while(orderset.next())
 			{
 				Orderitems od=new Orderitems(orderset.getInt(1),orderset.getDate(2),orderset.getString(3),orderset.getString(4),orderset.getDouble(5),orderset.getString(6),orderset.getDouble(7),orderset.getDouble(8)); 
-			     orderlists.add(od);
-			     System.out.println("added");
+			 //   System.out.println(od.or_id); 
+				orderlists.add(od);
+				
+//				for(int i=0;i<orderlists.size();i++){
+//					System.out.println(orderlists.get(i).or_id+" "+orderlists.get(i).disc_coupon);
+//				}
+//			     System.out.println("added");
 			}
 									
 		}
@@ -187,7 +194,8 @@ public class AdminPage extends JFrame {
 	}
 	
 	
-	public AdminPage() {
+	public AdminPage(String user) {
+		username=user;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100,731,445);
 		contentPane = new JPanel();
@@ -336,6 +344,9 @@ public class AdminPage extends JFrame {
 		panel_5.setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setText("welcome"+" "+username);
+		lblNewLabel.setFont(new Font("Algerian", Font.PLAIN, 45));
 		lblNewLabel.setBounds(118, 23, 321, 71);
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblNewLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED,null,null));
@@ -345,6 +356,12 @@ public class AdminPage extends JFrame {
 		panel_6.setBounds(0, 118, 604, 297);
 		panel_3.add(panel_6);
 		panel_6.setLayout(null);
+		
+		JLabel lblNewLabel_8 = new JLabel("");
+		lblNewLabel_8.setBounds(0, 0, 604, 297);
+		lblNewLabel_8.setIcon(new ImageIcon(new ImageIcon(AdminPage.class.getResource("/image/a1.jpg")).getImage().getScaledInstance(lblNewLabel_8.getWidth(), lblNewLabel_8.getHeight(), Image.SCALE_SMOOTH)));
+		
+		panel_6.add(lblNewLabel_8);
 		
 		final JPanel panel_2 = new JPanel();
 		panel_2.setBackground(Color.CYAN);
@@ -406,6 +423,13 @@ public class AdminPage extends JFrame {
 				DBConnect.addartist.executeUpdate();
 				JOptionPane.showMessageDialog(null, "added");
 				
+				textField.setText("");
+				textField_1.setText("");
+				textField_2.setText("");
+				textField_18.setText("");
+				textField_19.setText("");
+			    	arimage.setIcon(null);
+				
 				}
 				catch(Exception e)
 				{   e.printStackTrace();
@@ -423,7 +447,7 @@ public class AdminPage extends JFrame {
 		lblNewLabel_4.setBounds(134, 11, 332, 57);
 		panel_2.add(lblNewLabel_4);
 		
-		final JLabel arimage = new JLabel("");
+		arimage = new JLabel("");
 		arimage.setBounds(423, 84, 153, 130);
 		panel_2.add(arimage);
 		
@@ -470,7 +494,7 @@ public class AdminPage extends JFrame {
 		panel_2.add(textField_19);
 		
 		JPanel panel_7 = new JPanel();
-		panel_7.setBackground(new Color(255, 192, 203));
+		panel_7.setBackground(new Color(0, 255, 255));
 		panel_1.add(panel_7, "removeartist");
 		panel_7.setLayout(null);
 		
@@ -510,10 +534,13 @@ public class AdminPage extends JFrame {
 		final JComboBox comboBox = new JComboBox();
 		ArrayList<String> arr=new ArrayList<String>();
 		try
-		{
-			while(DBConnect.rs.next())
+		{    java.sql.PreparedStatement prs= DBConnect.conn.prepareStatement("select art_id from artist");
+		     //DBConnect.smt.executeQuery();
+		 ResultSet rs=   prs.executeQuery();
+		     
+			while(rs.next())
 			{
-				arr.add(DBConnect.rs.getString(1));
+				arr.add(rs.getString(1));
 				
 		     //   cmodel =new DefaultComboBoxModel(arr);
 //				cmodel.addElement();
@@ -522,7 +549,7 @@ public class AdminPage extends JFrame {
 		}
 		catch(Exception e)
 		{
-			JOptionPane.showMessageDialog(null,"hi");
+			JOptionPane.showMessageDialog(null,e);
 		}
 		comboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -619,6 +646,13 @@ public class AdminPage extends JFrame {
 					DBConnect.remove_artist.executeUpdate();
 				   JOptionPane.showMessageDialog(null,"deleted..!!!" );
 				   
+				   textField_3.setText("");
+				   textField_4.setText("");
+				   textField_5.setText("");
+				   textField_6.setText("");
+				  // textField_3.setText("");
+					
+				   
 				   
 					
 				} catch (SQLException e) {
@@ -642,7 +676,7 @@ public class AdminPage extends JFrame {
 		panel_7.add(removeimg);
 		
 		final JPanel panel_8 = new JPanel();
-		panel_8.setBackground(new Color(173, 255, 47));
+		panel_8.setBackground(new Color(0, 255, 255));
 		panel_1.add(panel_8, "addartworks");
 		panel_8.setLayout(null);
 		
@@ -680,11 +714,15 @@ public class AdminPage extends JFrame {
 				{
 					 f=fc.getSelectedFile();
 					path=f.getPath();
+					ImageIcon icc=new ImageIcon(new ImageIcon(fc.getSelectedFile().getPath()).getImage().getScaledInstance(workimage.getWidth(),workimage.getHeight(),Image.SCALE_DEFAULT));
+					workimage.setIcon(icc);
+					textField_20.setText(path);
+					
 				}
 			}
 		});
 		btnChooseFile.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnChooseFile.setBounds(149, 267, 133, 23);
+		btnChooseFile.setBounds(447, 219, 133, 23);
 		panel_8.add(btnChooseFile);
 		
 		textField_7 = new JTextField();
@@ -728,6 +766,14 @@ public class AdminPage extends JFrame {
 					
 					DBConnect.addartwork.executeUpdate();
 					JOptionPane.showMessageDialog(null,"added");
+					
+					 textField_7.setText("");
+					   textField_8.setText("");
+					   textField_9.setText("");
+					   textField_10.setText("");
+					  workimage.setIcon(null);
+						textField_20.setText("");
+
 				}
 				catch(Exception e)
 				{
@@ -782,9 +828,18 @@ public class AdminPage extends JFrame {
 		comboBox_3.setBounds(159, 319, 123, 20);
 		panel_8.add(comboBox_3);
 		
+		 workimage = new JLabel("");
+		workimage.setBounds(447, 77, 147, 131);
+		panel_8.add(workimage);
+		
+		textField_20 = new JTextField();
+		textField_20.setColumns(10);
+		textField_20.setBounds(182, 270, 196, 24);
+		panel_8.add(textField_20);
+		
 		
 		final JPanel panel_9 = new JPanel();
-		panel_9.setBackground(new Color(153, 50, 204));
+		panel_9.setBackground(new Color(0, 255, 255));
 		panel_1.add(panel_9, "removeartworks");
 		panel_9.setLayout(null);
 		
@@ -935,6 +990,12 @@ public class AdminPage extends JFrame {
 				 	
 					DBConnect.updateartwork.executeUpdate();
 					JOptionPane.showMessageDialog(null,"added");
+					
+					textField_11.setText("");
+					textField_12.setText("");
+					textField_13.setText("");
+					textField_14.setText("");
+					aimage.setIcon(null);
 				
 				//	DBConnect.updateartwork.setString(2,);
 				} catch (Exception e) {
@@ -1002,7 +1063,7 @@ public class AdminPage extends JFrame {
 		panel_9.add(comboBox_4);
 		
 		JPanel panel_10 = new JPanel();
-		panel_10.setBackground(new Color(255, 255, 0));
+		panel_10.setBackground(new Color(0, 255, 255));
 		panel_1.add(panel_10, "addadmin");
 		panel_10.setLayout(null);
 		
@@ -1074,6 +1135,10 @@ public class AdminPage extends JFrame {
 				
 				JOptionPane.showMessageDialog(null,"new admin added sucessfully");
 				
+				textField_15.setText("");
+				textField_16.setText("");
+				textField_17.setText("");
+				
 				}
 				catch(Exception e)
 				{
@@ -1090,7 +1155,7 @@ public class AdminPage extends JFrame {
 			
 		
 		panel_11 = new JPanel();
-		panel_11.setBackground(new Color(138, 43, 226));
+		panel_11.setBackground(new Color(0, 255, 255));
 		JScrollPane scrollOrder=new JScrollPane(panel_11);
 		
 		GridBagLayout gbl_panel_11 = new GridBagLayout();
@@ -1103,7 +1168,7 @@ public class AdminPage extends JFrame {
 		for(int i1=0;i1<orderrow;i1++)
 		{
 			getheightofrow[i1]=200;
-			System.out.println("i am called");
+//			System.out.println("i am called");
 		}
 		
 		gbl_panel_11.rowHeights =getheightofrow;
@@ -1117,12 +1182,11 @@ public class AdminPage extends JFrame {
 		
 		for(int j=0;j<orderlists.size();j++)
 		{
-			System.out.println("added new card");
+			//System.out.println("added new card");
 			addorder(orderlists.get(j),j);
+//			System.out.println(orderlists.get(j).or_id);
 			
-		}
-		
-		
+		}	
 		
 		
 		//System.out.println(panel_12.getPreferredSize());
@@ -1145,21 +1209,69 @@ public class AdminPage extends JFrame {
 		
 		
 		
-		JLabel orderid=new JLabel("orderID");
-		orderid.setBounds(0,0,100,50);
+		JLabel orderid=new JLabel("orderID :");
+		orderid.setBounds(10,10,100,15);
 		mPanel.add(orderid);
 		
-//		JLabel date=new JLabel("Date");
-//		orderid.setBounds(50,50,100,50);
-//		card_order.add(date);
-//
-//		JLabel name=new JLabel("username");
-//		orderid.setBounds(50,50,100,50);
-//		card_order.add(name);
+		JLabel displayid=new JLabel(""+o.or_id);
+		displayid.setBounds(130,10,100,15);
+		mPanel.add(displayid);
+				
+		JLabel date=new JLabel("Date :");
+		date.setBounds(10,35,100,15);
+		mPanel.add(date);
+		
+	 //   SimpleDateFormat sdt=new SimpleDateFormat("dd-mm-yyyy");
+	  //  String datee=sdt.format(o.d);
+		JLabel displaydate=new JLabel(""+o.d);
+		displaydate.setBounds(130,35,100,15);
+		mPanel.add(displaydate);
+
+
+		JLabel lblname=new JLabel("username :");
+		lblname.setBounds(10,60,100,15);
+		mPanel.add(lblname);
+		
+		JLabel displayuname=new JLabel(""+o.uname);
+		displayuname.setBounds(130,60,100,15);
+		mPanel.add(displayuname);
+		
+		
+		JLabel lbldelivered=new JLabel("Deliverd or not ? :");
+		lbldelivered.setBounds(10, 85, 100, 15);
+		mPanel.add(lbldelivered);
+		
+		JLabel displaydelivered=new JLabel(""+o.delivered);
+		displaydelivered.setBounds(130, 85, 100, 15);
+		mPanel.add(displaydelivered);
 //		
-//		JLabel price=new JLabel("PRICE :");
-//		orderid.setBounds(50,50,100,50);
-//		card_order.add(price);
+//		
+		JLabel lblprice=new JLabel("PRICE :");
+		lblprice.setBounds(10,110,100,15);
+		mPanel.add(lblprice);
+		
+		JLabel displayprice=new JLabel(""+o.price);
+		displayprice.setBounds(130,110,100,15);
+		mPanel.add(displayprice);
+		
+		
+		JLabel lblfinalprice=new JLabel("Final price :");
+		lblfinalprice.setBounds(10,135,100,15);
+		mPanel.add(lblfinalprice);
+		
+		JLabel disfinal=new JLabel(""+o.finalprice);
+		disfinal.setBounds(130,135,100,15);
+		mPanel.add(disfinal);
+		
+		JLabel disc=new JLabel("Discount added :");
+		disc.setBounds(10,160,100,15);
+		mPanel.add(disc);
+		
+		JLabel displaydisc=new JLabel(""+o.discount);
+		displaydisc.setBounds(130,160,100,15);
+		mPanel.add(displaydisc);
+
+
 
 		
 		/* Do Nothing beyond this point in this function

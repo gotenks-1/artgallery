@@ -3,11 +3,12 @@ package artgallery;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
-import javax.swing.*;
 
+import javax.swing.*;
 //import javax.swing.JFrame;
 //import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
 //import javax.swing.JMenuBar;
 //import javax.swing.JMenu;
 //
@@ -19,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 import java.awt.SystemColor;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
@@ -55,7 +57,7 @@ public class LoginPage extends JFrame {
 			return false;
 		String qry="select * from users where username='"+s+"'";
 		try {
-			ResultSet rs=db.smt.executeQuery(qry);
+			ResultSet rs=DBConnect.smt.executeQuery(qry);
 			rs.last();
 			if(rs.getRow()>0)
 				return false;
@@ -152,9 +154,10 @@ public class LoginPage extends JFrame {
 				{
 					String qry="select * from adminlogin where username='"+uname+"' and pass='"+upass+"'";
 					try {
+						
 						ResultSet rs=db.smt.executeQuery(qry);
 						if(rs.last()&&rs.getRow()==1){
-							new AdminPage().setVisible(true);
+							new AdminPage(uname).setVisible(true);
 							dispose();
 						}
 						else{
@@ -163,6 +166,7 @@ public class LoginPage extends JFrame {
 					} 
 					catch (Exception e1) {
 						e1.printStackTrace();
+						JOptionPane.showMessageDialog(null,e);
 					}
 				
 				}
@@ -170,7 +174,7 @@ public class LoginPage extends JFrame {
 				{
 					String qry="select * from users where username='"+uname+"' and pass='"+upass+"'";
 					try {
-						ResultSet rs=db.smt.executeQuery(qry);
+						ResultSet rs=DBConnect.smt.executeQuery(qry);
 						if(rs.last()&&rs.getRow()==1){
 							new RegistereduserPage(uname).setVisible(true);
 							dispose();
@@ -217,6 +221,118 @@ public class LoginPage extends JFrame {
 		JSeparator separator = new JSeparator();
 		separator.setBounds(5, 56, 311, 13);
 		panel.add(separator);
+		
+		JButton btnNewButton = new JButton("Forget Password ?");
+		btnNewButton.setBackground(null);
+		btnNewButton.setContentAreaFilled(false);
+		btnNewButton.setBorder(null);
+	//	btnNewButton.setVerticalAlignment(RIGHT);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(ruser.getText().equals("")){
+					JOptionPane.showMessageDialog(contentPane, "Enter username first");
+					return;
+				}
+				
+				if(rdbtnAdmin.isSelected()){
+//					String ans=JOptionPane.showInputDialog(null,"Please enter your security answer");
+//					System.out.println(ans);
+					//String query="select sq_ans from adminlogin where username='"+ruser+"'";
+					
+					try{
+						PreparedStatement pss=DBConnect.conn.prepareStatement("select sq_ans,sq,pass from adminlogin where username=?");
+						String uname=ruser.getText();
+						pss.setString(1,ruser.getText());
+						
+						ResultSet q=pss.executeQuery();
+						
+						if(q.next()){
+						String pass=q.getString(1);
+						String ques=q.getString(2);
+						String pwd=q.getString(3);
+//						System.out.println(pass);
+						
+						if(ques==null){
+							JOptionPane.showMessageDialog(contentPane, "Securty ques is not setup.\nContact admin.");
+							return;
+						}
+						
+						String ans=JOptionPane.showInputDialog(contentPane,"Enter ans for sq:-\n"+ques);
+						if(pass.equals(ans))
+						{    
+							JOptionPane.showMessageDialog(contentPane, "Your Pass is :- "+pwd);
+						}
+						else{
+							JOptionPane.showMessageDialog(contentPane, "Wrong answer");
+						}
+					}else{
+						JOptionPane.showMessageDialog(contentPane, "Invalid Username");
+					}
+					}
+					catch(Exception e)
+					{    e.printStackTrace();
+						JOptionPane.showMessageDialog(null,e);
+					}
+				}
+				else{
+					
+					try{
+						PreparedStatement pss=DBConnect.conn.prepareStatement("select sq_ans,sq,pass from users where username=?");
+						String uname=ruser.getText();
+						pss.setString(1,ruser.getText());
+						
+						ResultSet q=pss.executeQuery();
+						
+						if(q.next()){
+						String pass=q.getString(1);
+						String ques=q.getString(2);
+						String pwd=q.getString(3);
+//						System.out.println(pass);
+						
+						if(ques==null){
+							JOptionPane.showMessageDialog(contentPane, "Securty ques is not setup.\nContact admin.");
+							return;
+						}
+						
+						
+						
+						String ans=JOptionPane.showInputDialog(contentPane,"Enter ans for sq:-\n"+ques);
+						if(pass.equals(ans))
+						{    
+							JOptionPane.showMessageDialog(contentPane, "Your Pass is :- "+pwd);
+						}
+						else{
+							JOptionPane.showMessageDialog(contentPane, "Wrong answer");
+						}
+					}else{
+						JOptionPane.showMessageDialog(contentPane, "Invalid Username");
+					}
+					}
+					catch(Exception e)
+					{    e.printStackTrace();
+						JOptionPane.showMessageDialog(null,e);
+					}
+					
+						}	
+				
+			}
+		});
+		btnNewButton.setBounds(116, 233, 200, 29);
+		panel.add(btnNewButton);
+		
+		JButton btnNewButton_1 = new JButton("Continue as Guest user");
+		btnNewButton_1.setContentAreaFilled(false);
+		btnNewButton_1.setBorder(null);
+		btnNewButton_1.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent arg0) {
+			RegistereduserPage.main(new String[]{""});
+			dispose();
+			
+			}
+		});
+		btnNewButton_1.setBounds(116, 264, 192, 23);
+		panel.add(btnNewButton_1);
 		
 		JPanel registerpanel = new JPanel();
 		registerpanel.setBackground(UIManager.getColor("info"));
@@ -280,7 +396,7 @@ public class LoginPage extends JFrame {
 							if(validateemail(remail)){
 								String sql="insert into users(name,username,pass,email) values(?,?,?,?)";
 								try {
-									PreparedStatement ps=db.conn.prepareStatement(sql);
+									PreparedStatement ps=DBConnect.conn.prepareStatement(sql);
 									ps.setString(1, rname);
 									ps.setString(2, ruser);
 									ps.setString(3, rpass);
