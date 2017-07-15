@@ -51,7 +51,7 @@ import javax.swing.JTextField;
 class Cart{
 	ArrayList<CartItem> cartItems=new ArrayList<CartItem>();
 	double totalPrice;
-	String discountCoupon="nocoupen";
+	String discountCoupon="nocoupon";
 	int discountper=0;
 	double discount;
 	double pricePay;
@@ -340,7 +340,30 @@ public class RegistereduserPage extends JFrame {
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(contentPane, "Order placed");
+					String qry="";
+					String dcc=myCart.discountCoupon;
+					if(dcc.equals("nocoupon")){
+						dcc="null";
+					}
+					qry="INSERT INTO `orders`(`Date`, `user_name`, `deliverd_or_not`, `price`, `discount_coupon`,`final_price`, `discount`) VALUES (curdate(),'"+username+"','no',"+myCart.totalPrice+",'"+dcc+"',"+myCart.pricePay+","+myCart.discount+")";
+					try {
+						int rs=DBConnect.conn.prepareStatement(qry).executeUpdate();
+						if(rs!=PreparedStatement.EXECUTE_FAILED){
+							ResultSet r=DBConnect.conn.prepareStatement("select max(o_id) from orders where user_name='"+username+"'").executeQuery();
+							if(r.next()){
+									for(CartItem ci:myCart.cartItems){
+										String qry1="insert into oder_item values("+r.getInt(1)+","+ci.item.id+","+ci.qty+")";
+										DBConnect.conn.prepareStatement(qry1).executeUpdate();
+									}
+							}
+							myCart=new Cart();
+							JOptionPane.showMessageDialog(contentPane, "Order placed");
+						}
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 				}
 			}
 		});
@@ -355,6 +378,9 @@ public class RegistereduserPage extends JFrame {
 		
 	}
 	
+	void placeOrder(Cart cc){
+		
+	}
 	
 	void addCartItemtoPanel(final CartItem ci,int i){
 		JPanel mainItemPanel=new JPanel();
